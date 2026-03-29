@@ -1,0 +1,27 @@
+#ifndef NN_H
+#define NN_H
+#include <stdio.h>
+#include <stdlib.h>
+#include <stdint.h>
+// type declarations
+typedef int8_t i8;
+typedef uint8_t u8;
+typedef int16_t i16;
+typedef uint16_t u16;
+typedef int32_t i32;
+typedef uint32_t u32;
+typedef int64_t i64;
+typedef uint64_t u64;
+// struct declarations
+typedef struct
+{
+	u32 rows;
+	u32 columns;
+	float* data;
+} matrix;
+// function declarations
+matrix* allocate_matrix(u32 rows, u32 columns);
+void free_matrix(matrix* mat);
+void print_matrix(matrix* mat);
+void fill_matrix(matrix* mat, int start, int end);
+#endif
