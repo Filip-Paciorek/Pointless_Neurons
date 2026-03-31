@@ -8,23 +8,12 @@ matrix* transpose_matrix(matrix* mat);
 
 int main()
 {
-	struct timespec start, end;
-	matrix* mat = allocate_matrix(5,5);
+	matrix* mat = allocate_matrix(6,5);
 	fill_matrix(mat,0,100);
-	clock_gettime(CLOCK_MONOTONIC, &start);
 	print_matrix(mat);
-	clock_gettime(CLOCK_MONOTONIC,&end);
-	i64 t1 = time_diff(start,end);
-	printf("\n-------------\n");
-	clock_gettime(CLOCK_MONOTONIC,&start);
-	print_matrix2(mat);
-	clock_gettime(CLOCK_MONOTONIC,&end);
-	i64 t2 = time_diff(start,end);
-	printf("Elapsed 1: %ld ns\n",t1); 
-	printf("Elapsed 2: %ld ns\n",t2); 
-	printf("Elapsed diff: %ld ns\n",t1 - t2); 
+	printf("\n-------------\n"); 
 	matrix* mat_t = transpose_matrix(mat);
-	//print_matrix(mat_t);
+	print_matrix(mat_t);
 	free_matrix(mat);
 	free_matrix(mat_t);
 	return 1;
@@ -44,7 +33,7 @@ matrix* transpose_matrix(matrix* mat)
 	{
 		for (u32 j = 0; j <rows; j++)
 		{ 
-			mat_t->data[(rows*i) + j] = mat->data[(columns*i) + j];
+			mat_t->data[(rows*i) + j] = mat->data[(rows*j) + i];
 		}
 	}
 	return mat_t;

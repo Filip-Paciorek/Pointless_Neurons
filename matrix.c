@@ -28,23 +28,8 @@ void free_matrix(matrix* mat)
 	free(mat);
 };
 
-void print_matrix(matrix* mat)
-{
-/* A function that prints out the matrix in its 2D structure ***important to note that it is 1D,
- * mapped to 2D, not really 2D*** */
 
-	// Calculate the total number of data points
-	int sum_of_data = mat->rows*mat->columns;
-	for (int i = 0; i < sum_of_data; i++)
-	{
-		if (i != 0 && i % mat->columns == 0)
-		{
-			printf("\n");
-		}
-		printf("%f, ",(mat->data)[i]);
-	}
-}
-void print_matrix2(matrix* mat)
+void print_matrix(matrix* mat)
 {
 	for (int i = 0; i < mat->rows; i++)
 	{
