@@ -44,6 +44,17 @@ void print_matrix(matrix* mat)
 		printf("%f, ",(mat->data)[i]);
 	}
 }
+void print_matrix2(matrix* mat)
+{
+	for (int i = 0; i < mat->rows; i++)
+	{
+		printf("\n");
+		for (int j = 0; j < mat->columns; j++)
+		{
+			printf("%f, ", (mat->data)[(i*(mat->columns))+j]);
+		}
+	}
+}
 void fill_matrix(matrix* mat,int start, int end)
 {	
 /* A function that fills the flattened matrix with numbers in range start end*/ 
