@@ -21,7 +21,9 @@ typedef struct
 } matrix;
 // function declarations
 matrix* allocate_matrix(u32 rows, u32 columns);
+matrix* transpose_matrix(matrix* mat);
 void free_matrix(matrix* mat);
 void print_matrix(matrix* mat);
 void fill_matrix(matrix* mat, int start, int end);
+i64 time_diff(struct timespec a, struct timespec b);
 #endif
