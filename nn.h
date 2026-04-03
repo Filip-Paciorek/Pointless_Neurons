@@ -22,6 +22,7 @@ typedef struct
 // function declarations
 matrix* allocate_matrix(u32 rows, u32 columns);
 matrix* transpose_matrix(matrix* mat);
+matrix* multiply_matrices(matrix* mat1, matrix* mat2);
 void free_matrix(matrix* mat);
 void print_matrix(matrix* mat);
 void fill_matrix(matrix* mat, int start, int end);
