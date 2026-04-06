@@ -14,10 +14,10 @@ typedef struct {
 
 typedef struct {
 	u32 num_layers;
-	Layer* layers;
+	Layer** layers;
 } Network;
 
-void create_network_structure(Layer* array);
+Network* create_network_structure(u32* array,u32 num_layers);
 Layer* allocate_layer(u32 num_in, u32 num_out);
 void calculate_layer(Layer* l1, matrix* input);
 void free_layer(Layer* l);
@@ -26,27 +26,16 @@ int main()
 {
 	matrix* mat = allocate_matrix(2,4);
 	fill_matrix(mat,0,3);
-	print_matrix(mat);
-	printf("\n-------------\n");
 	matrix* mat_t = allocate_matrix(4,2);
 	transpose_matrix(mat,mat_t);
-	print_matrix(mat_t);
 	matrix* mult_mat = allocate_matrix(2,2);
 	multiply_matrices(mat,mat_t,mult_mat);
-	printf("\n----------------\n");
-	print_matrix(mult_mat);
-	printf("\n-----------------\n");
 	matrix* add_mat = allocate_matrix(2,4);
 	matrix* add_vec = allocate_matrix(1,4);
 	fill_matrix(add_mat,0,5);
-	print_matrix(add_mat);
 	fill_matrix(add_vec,0,5);
 	add_matrices(mat,add_mat,add_mat);
-	print_matrix(add_mat);
-	printf("\n---------------\n");
-	print_matrix(add_vec);
 	add_vector_to_matrix(add_mat,add_vec,add_mat);
-	print_matrix(add_mat);
 	free_matrix(mat);
 	free_matrix(mat_t);
 	free_matrix(mult_mat);
@@ -56,6 +45,8 @@ int main()
 	fill_matrix(test,0,4);
 	Layer* l1 = allocate_layer(4,2);
 	calculate_layer(l1,test);
+	print_matrix(l1->out);
+	free_matrix(test);
 	free_layer(l1);
 	//create_network_structure(l1);
 	return 1;
@@ -76,7 +67,7 @@ Layer* allocate_layer(u32 num_in,u32 num_out)
 
 void calculate_layer(Layer* l,matrix* input)
 {
-	//l->out.data = multiply_matrices(input,l->W);
+	multiply_matrices(l->W,input,l->out);
 }
 
 void free_layer(Layer* l)
@@ -89,12 +80,26 @@ void free_layer(Layer* l)
 	free(l);
 }
 
-void create_network_structure(Layer* array)
+Network* create_network_structure(u32* arr, u32 num_layers)
 {
-	
-	printf("");
+	Network* nn = malloc(sizeof(*nn));
+	nn->num_layers = num_layers-1;
+	nn->layers = malloc(nn->num_layers*sizeof(Layer*));
+	for(int i = 0; i <nn->num_layers;i++)
+	{
+		nn->layers[i] = allocate_layer(arr[i],arr[i+1]);
+	}
+	return nn;
 }
-
+void free_network(Network* nn)
+{
+	for(int i = 0; i < nn->num_layers;i++)
+	{
+		free_layer(nn->layers[i]);
+	}
+	free(nn->layers);
+	free(nn);
+}
 i64 time_diff(struct timespec a, struct timespec b)
 {
 	return ((b.tv_sec - a.tv_sec) * 1000000000LL + (b.tv_nsec - a.tv_nsec));
