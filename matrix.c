@@ -125,11 +125,11 @@ void add_vector_to_matrix(matrix* mat, matrix* vec, matrix* add_mat)
 	}
 	for (int i = 0; i < mat->rows;i++)
 	{
-		for (int j = 0; j < mat->columns; i++)
+		for (int j = 0; j < mat->columns; j++)
 		{
 			float a = mat->data[i*mat->columns + j];
 			float b = vec->data[j];
-			add_mat->data[i*mat->columns +j]; 
+			add_mat->data[i*mat->columns +j] = a+b; 
 		}
 	}
 }
