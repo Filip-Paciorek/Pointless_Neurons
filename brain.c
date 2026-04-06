@@ -1,7 +1,10 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <time.h>
+#include <math.h>
 #include "nn.h"
+
+//struct definitions
 
 typedef struct {
 	u32 num_in;
@@ -17,13 +20,20 @@ typedef struct {
 	Layer** layers;
 } Network;
 
-Network* create_network_structure(u32* array,u32 num_layers);
+//function definitions
+
 Layer* allocate_layer(u32 num_in, u32 num_out);
+void print_layer_weights(Layer* l);
 void calculate_layer(Layer* l1, matrix* input);
 void free_layer(Layer* l);
+Network* create_network_structure(u32* array,u32 num_layers);
+void print_network_params(Network* nn);
+void free_network(Network* nn);
+void He_initialization(Layer* l);
 
 int main()
 {
+	//testing basic matrix arithmetic
 	matrix* mat = allocate_matrix(2,4);
 	fill_matrix(mat,0,3);
 	matrix* mat_t = allocate_matrix(4,2);
@@ -41,6 +51,7 @@ int main()
 	free_matrix(mult_mat);
 	free_matrix(add_mat);
 	free_matrix(add_vec);
+	//testing nn structures
 	matrix* test = allocate_matrix(1,4);
 	fill_matrix(test,0,4);
 	Layer* l1 = allocate_layer(4,2);
@@ -48,7 +59,18 @@ int main()
 	print_matrix(l1->out);
 	free_matrix(test);
 	free_layer(l1);
-	//create_network_structure(l1);
+	u32 arr[] = {12,8,2};
+	Network* nn = create_network_structure(arr,3);
+	fill_matrix(nn->layers[0]->in,0,10);
+	print_network_params(nn);
+	for(int i=0; i < nn->num_layers;i++)
+	{
+		printf("Layer %d \n", i);
+		He_initialization(nn->layers[i]);
+		calculate_layer(nn->layers[i],nn->layers[i]->in);
+		print_layer_weights(nn->layers[i]);
+	};
+	free_network(nn);
 	return 1;
 }
 
@@ -64,9 +86,21 @@ Layer* allocate_layer(u32 num_in,u32 num_out)
 	l->out = allocate_matrix(l->num_out,1);
 	return l;
 }
-
+void print_layer_weights(Layer* l)
+{
+/* Print out the weigths assigned to the layer*/
+	for(int i =0; i < l->W->rows;i++)
+	{
+		for(int j = 0; j < l->W->columns;j++)
+		{
+			printf("%f ",l->W->data[i*l->W->columns + j]);
+		}
+		printf("\n");
+	}
+}
 void calculate_layer(Layer* l,matrix* input)
 {
+/* Calculate the layer by multiplication and point it to the output*/
 	multiply_matrices(l->W,input,l->out);
 }
 
@@ -82,6 +116,7 @@ void free_layer(Layer* l)
 
 Network* create_network_structure(u32* arr, u32 num_layers)
 {
+/* Allocate a network structure with a 2D layer structure*/
 	Network* nn = malloc(sizeof(*nn));
 	nn->num_layers = num_layers-1;
 	nn->layers = malloc(nn->num_layers*sizeof(Layer*));
@@ -91,14 +126,40 @@ Network* create_network_structure(u32* arr, u32 num_layers)
 	}
 	return nn;
 }
+void print_network_params(Network* nn)
+{
+/* Print network's layer's number of neurons going in and out*/
+	for(int i = 0; i < nn->num_layers;i++)
+	{
+		printf("Layer %d - in: %d out: %d \n",i,nn->layers[i]->num_in,nn->layers[i]->num_out);
+	}
+}
 void free_network(Network* nn)
 {
+/* Free the network */
 	for(int i = 0; i < nn->num_layers;i++)
 	{
 		free_layer(nn->layers[i]);
 	}
 	free(nn->layers);
 	free(nn);
+}
+void He_initialization(Layer* l)
+{
+/* Use He initialization on all the weights of the layer*/
+	double limit = sqrtf((2.0 / l->num_in));
+	printf("%f \n",limit);
+	for (int i =0; i < l->W->rows;i++)
+	{
+		for(int j =0; j < l->W->columns;j++)
+		{
+			l->W->data[i*l->W->columns + j] = (((double)rand() /(double)RAND_MAX) * (2*limit))-limit;
+		}
+	}
+}
+void ReLU_activation(Layer* l)
+{
+	//
 }
 i64 time_diff(struct timespec a, struct timespec b)
 {
