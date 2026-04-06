@@ -49,3 +49,48 @@ void fill_matrix(matrix* mat,int start, int end)
 		(mat->data)[i] = rand() % (end-start) + start;
 	}
 }
+
+matrix* transpose_matrix(matrix* mat)
+{
+	u32 columns = mat->columns;
+	u32 rows = mat->rows;
+	matrix* mat_t = allocate_matrix(mat->columns,mat->rows);
+	for (u32 i = 0; i < rows; i++)
+	{
+		for (u32 j = 0; j <columns; j++)
+		{ 
+			u32 original_index = (i*columns) +j;
+			u32 transposed_index = (j*rows)+i;
+			mat_t->data[transposed_index] = mat->data[original_index];
+		}
+	}
+	return mat_t;
+}
+matrix* multiply_matrices(matrix* mat1, matrix* mat2)
+{
+
+	if (mat1->columns != mat2->rows)
+	{
+		printf("Wrong matrice dimensions!");
+		return NULL;
+	}
+	float mult_sum = 0;
+	matrix* mult_mat = allocate_matrix(mat1->rows,mat2->columns);
+	for (u32 i =0; i < mat1->rows; i++)
+	{
+		for (u32 j =0; j < mat2->columns; j++)
+		{
+			mult_sum = 0;
+			for (u32 k = 0; k < mat1->columns; k++)
+			{
+				float a = mat1->data[i*mat1->columns +k];
+				float b = mat2->data[k*mat2->columns + j];
+				mult_sum += (float)a * (float)b;
+			}
+		mult_mat->data[(i*mat2->columns) + j] = mult_sum;
+		}
+	
+	}
+
+	return mult_mat;
+}

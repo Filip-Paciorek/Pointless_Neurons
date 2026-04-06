@@ -3,21 +3,6 @@
 #include <time.h>
 #include "nn.h"
 
-<<<<<<< Updated upstream
-matrix* transpose_matrix(matrix* mat);
-
-
-int main()
-{
-	matrix* mat = allocate_matrix(6,5);
-	fill_matrix(mat,0,100);
-	print_matrix(mat);
-	printf("\n-------------\n"); 
-	matrix* mat_t = transpose_matrix(mat);
-	print_matrix(mat_t);
-	free_matrix(mat);
-	free_matrix(mat_t);
-=======
 typedef struct {
 	u32 num_in;
 	u32 num_out;
@@ -26,14 +11,17 @@ typedef struct {
 	matrix* b;
 	matrix* out;
 } Layer;
+
 typedef struct {
 	u32 num_layers;
 	Layer* layers;
 } Network;
+
 void create_network_structure(Layer* array);
 Layer* allocate_layer(u32 num_in, u32 num_out);
 Layer* calculate_layer(Layer* l1, Layer* l2);
 void free_layer(Layer* l);
+
 int main()
 {
 	matrix* mat = allocate_matrix(2,4);
@@ -51,9 +39,9 @@ int main()
 	Layer* l1 = allocate_layer(32,16);
 	free_layer(l1);
 	//create_network_structure(l1);
->>>>>>> Stashed changes
 	return 1;
 }
+
 Layer* allocate_layer(u32 num_in,u32 num_out)
 {
 /* Using arguments num_in and num_out calculate the sizes of each element of the layer necessary */
@@ -66,10 +54,12 @@ Layer* allocate_layer(u32 num_in,u32 num_out)
 	l->out = allocate_matrix(l->num_out,1);
 	return l;
 }
+
 Layer* calculate_layer(Layer* l1, Layer* l2)
 {
 	multiply_matrices(l1->out,l2->W);
 }
+
 void free_layer(Layer* l)
 {
 /* Free every part of the layer and then the layer itself*/
@@ -79,26 +69,14 @@ void free_layer(Layer* l)
 	free_matrix(l->out);
 	free(l);
 }
+
 void create_network_structure(Layer* array)
 {
 	
 	printf("");
 }
+
 i64 time_diff(struct timespec a, struct timespec b)
 {
 	return ((b.tv_sec - a.tv_sec) * 1000000000LL + (b.tv_nsec - a.tv_nsec));
-}
-matrix* transpose_matrix(matrix* mat)
-{
-	u32 columns = mat->columns;
-	u32 rows = mat->rows;
-	matrix* mat_t = allocate_matrix(mat->columns,mat->rows);
-	for (u32 i = 0; i < columns; i++)
-	{
-		for (u32 j = 0; j <rows; j++)
-		{ 
-			mat_t->data[(rows*i) + j] = mat->data[(rows*j) + i];
-		}
-	}
-	return mat_t;
 }
