@@ -50,11 +50,10 @@ void fill_matrix(matrix* mat,int start, int end)
 	}
 }
 
-matrix* transpose_matrix(matrix* mat)
+void transpose_matrix(matrix* mat,matrix* mat_t)
 {
 	u32 columns = mat->columns;
 	u32 rows = mat->rows;
-	matrix* mat_t = allocate_matrix(mat->columns,mat->rows);
 	for (u32 i = 0; i < rows; i++)
 	{
 		for (u32 j = 0; j <columns; j++)
@@ -64,18 +63,16 @@ matrix* transpose_matrix(matrix* mat)
 			mat_t->data[transposed_index] = mat->data[original_index];
 		}
 	}
-	return mat_t;
 }
-matrix* multiply_matrices(matrix* mat1, matrix* mat2)
+void multiply_matrices(matrix* mat1, matrix* mat2,matrix* mult_mat)
 {
 
 	if (mat1->columns != mat2->rows)
 	{
-		printf("Wrong matrice dimensions!");
-		return NULL;
+		printf("Wrong matrix dimensions!");
+		return;
 	}
 	float mult_sum = 0;
-	matrix* mult_mat = allocate_matrix(mat1->rows,mat2->columns);
 	for (u32 i =0; i < mat1->rows; i++)
 	{
 		for (u32 j =0; j < mat2->columns; j++)
@@ -91,6 +88,49 @@ matrix* multiply_matrices(matrix* mat1, matrix* mat2)
 		}
 	
 	}
-
-	return mult_mat;
 }
+
+void add_matrices(matrix* mat1, matrix* mat2,matrix* add_mat)
+{
+
+	if ((mat1->rows != mat2->rows) || (mat1->columns != mat2->columns))
+	{
+		printf("Wrong matrix dimensions!");
+		return;
+	}
+	if ((mat1->rows != add_mat->rows) || (mat1->columns != add_mat->columns))
+	{
+		printf("Wrong matrix dimensions!");
+		return;
+	}
+
+	float sum = 0;
+	for (u32 i =0; i < mat1->rows; i++)
+	{
+		for (u32 j =0; j < mat2->columns; j++)
+		{
+			float a = mat1->data[i*mat1->columns +j];
+			float b = mat2->data[i*mat2->columns + j];
+			add_mat->data[i*mat1->columns +j] = (float)a + (float)b;
+		}
+	
+	}
+}
+void add_vector_to_matrix(matrix* mat, matrix* vec, matrix* add_mat)
+{
+	if(mat->columns != vec->columns)
+	{
+		printf("Wrong matrix/vector dimensions!");
+		return;
+	}
+	for (int i = 0; i < mat->rows;i++)
+	{
+		for (int j = 0; j < mat->columns; i++)
+		{
+			float a = mat->data[i*mat->columns + j];
+			float b = vec->data[j];
+			add_mat->data[i*mat->columns +j]; 
+		}
+	}
+}
+

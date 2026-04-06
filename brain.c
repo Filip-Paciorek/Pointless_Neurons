@@ -19,24 +19,31 @@ typedef struct {
 
 void create_network_structure(Layer* array);
 Layer* allocate_layer(u32 num_in, u32 num_out);
-Layer* calculate_layer(Layer* l1, Layer* l2);
+void calculate_layer(Layer* l1, matrix* input);
 void free_layer(Layer* l);
 
 int main()
 {
 	matrix* mat = allocate_matrix(2,4);
 	fill_matrix(mat,0,3);
-	//print_matrix(mat);
-	printf("\n-------------\n"); 
-	matrix* mat_t = transpose_matrix(mat);
-	//print_matrix(mat_t);
-	matrix* mult_mat = multiply_matrices(mat,mat_t);
+	print_matrix(mat);
+	printf("\n-------------\n");
+	matrix* mat_t = allocate_matrix(4,2);
+	transpose_matrix(mat,mat_t);
+	print_matrix(mat_t);
+	matrix* mult_mat = allocate_matrix(2,2);
+	multiply_matrices(mat,mat_t,mult_mat);
 	printf("\n----------------\n");
-	//print_matrix(mult_mat);
+	print_matrix(mult_mat);
+	printf("\n-----------------\n");
+	add_matrices(mat,mat_t,mult_mat);
 	free_matrix(mat);
 	free_matrix(mat_t);
 	free_matrix(mult_mat);
-	Layer* l1 = allocate_layer(32,16);
+	matrix* test = allocate_matrix(1,4);
+	fill_matrix(test,0,4);
+	Layer* l1 = allocate_layer(4,2);
+	calculate_layer(l1,test);
 	free_layer(l1);
 	//create_network_structure(l1);
 	return 1;
@@ -49,15 +56,15 @@ Layer* allocate_layer(u32 num_in,u32 num_out)
 	l->num_in = num_in;
 	l->num_out = num_out;
 	l->in = allocate_matrix(l->num_in,1);
-	l->W = allocate_matrix(l->num_in,l->num_out);
+	l->W = allocate_matrix(l->num_out,l->num_in);
 	l->b = allocate_matrix(l->num_out,1);
 	l->out = allocate_matrix(l->num_out,1);
 	return l;
 }
 
-Layer* calculate_layer(Layer* l1, Layer* l2)
+void calculate_layer(Layer* l,matrix* input)
 {
-	multiply_matrices(l1->out,l2->W);
+	//l->out.data = multiply_matrices(input,l->W);
 }
 
 void free_layer(Layer* l)
