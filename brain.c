@@ -75,6 +75,8 @@ int main()
 		He_initialization(nn->layers[i]);
 		calculate_layer(nn->layers[i],nn->layers[i]->in);
 		ReLU_activation(nn->layers[i]);
+		free_matrix(nn->layers[i+1]->in);
+		nn->layers[i+1]->in = nn->layers[i]->out;
 		//print_layer_weights(nn->layers[i]);
 		//print_layer_outputs(nn->layers[i]);
 		print_matrix(nn->layers[i]->out);
@@ -96,7 +98,7 @@ Layer* allocate_layer(u32 num_in,u32 num_out)
 	l->in = allocate_matrix(l->num_in,1);
 	l->W = allocate_matrix(l->num_out,l->num_in);
 	l->b = allocate_matrix(l->num_out,1);
-	l->z = allocate_matrix(l->num_out,l->num_in);
+	l->z = allocate_matrix(l->num_out,1);
 	l->out = allocate_matrix(l->num_out,1);
 	return l;
 }
@@ -116,7 +118,7 @@ void print_layer_outputs(Layer* l)
 {
 	for(int i = 0; i < l->num_out; i++)
 	{
-		printf("%f",l->z[i]);
+		printf("%f",l->z->data[i]);
 	}
 	printf("\n");
 }
@@ -124,12 +126,16 @@ void calculate_layer(Layer* l,matrix* input)
 {
 /* Calculate the layer by multiplication and point it to the output*/
 	multiply_matrices(l->W,input,l->z);
+	add_vector_to_matrix(l->z,l->b,l->z);
 }
 
 void free_layer(Layer* l)
 {
 /* Free every part of the layer and then the layer itself*/
-	free_matrix(l->in);
+	if (l->in)
+	{
+		free_matrix(l->in);
+	}
 	free_matrix(l->W);
 	free_matrix(l->b);
 	free_matrix(l->z);
@@ -162,6 +168,10 @@ void free_network(Network* nn)
 /* Free the network */
 	for(int i = 0; i < nn->num_layers;i++)
 	{
+		if (i >0)
+		{
+			nn->layers[i]->in = NULL;
+		}
 		free_layer(nn->layers[i]);
 	}
 	free(nn->layers);
