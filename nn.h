@@ -29,4 +29,7 @@ void free_matrix(matrix* mat);
 void print_matrix(matrix* mat);
 void fill_matrix(matrix* mat, int start, int end);
 i64 time_diff(struct timespec a, struct timespec b);
+
+FILE * File_open(char *file_name);
+void file_close(FILE *fptr);
 #endif
