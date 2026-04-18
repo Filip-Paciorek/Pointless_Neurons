@@ -41,8 +41,8 @@ void Sigmoid_activation(Layer* l);
 void initialize_network(Network* nn);
 //BACKPROP FUNCTIONS
 float MSE(matrix* Y, Layer* Y_PRED);
-matrix* MSE_derivative_W(matrix* Y,Layer* Y_PRED);
-matrix* MSE_derivative_b(matrix* Y,Layer* Y_PRED);
+void* MSE_derivative_W(matrix* Y,Layer* Y_PRED);
+void* MSE_derivative_b(matrix* Y,Layer* Y_PRED);
 void Gradient_Descent(Layer* l,matrix* Y,u32 learning_rate);
 int main()
 {
@@ -103,6 +103,17 @@ int main()
 		print_matrix(nn->layers[i]->out);
 	};
 	free_network(nn);
+	matrix* Y = allocate_matrix(1, 2); 
+	Y->data[0] = 1.0; Y->data[1] = 0.0;
+
+	Layer* l_test = allocate_layer(4, 1, 2); 
+	l_test->out->data[0] = 0.8; l_test->out->data[1] = 0.2; 
+
+	MSE_derivative_b(Y, l_test);
+
+	printf("Gradient db[0]: %f\n", l_test->db->data[0]);	
+	free_layer(l_test);
+	free_matrix(Y);
 	return 1;
 }
 
@@ -307,20 +318,21 @@ float MSE(matrix* Y, Layer* Y_PRED)
 		double diff = (Y_PRED->out->data[i] - Y->data[i]);
 		sum += diff * diff;	
       }
-	return sum / (double)n;
+	return sum / (double)Y->columns;
 }
-matrix* MSE_derivative_W(matrix* Y, Layer* Y_PRED)
+void* MSE_derivative_W(matrix* Y, Layer* Y_PRED)
 {
 	return 0;
 }
-matrix* MSE_derivative_b(matrix* Y, Layer* Y_PRED)
+void* MSE_derivative_b(matrix* Y, Layer* Y_PRED)
 {
-
+	for(u32 k = 0; k < Y_PRED->db->rows;k++) Y_PRED->db->data[k] = 0;
 	for(u32 i = 0; i < Y->rows; i++)
 	{
 		for (u32 j = 0; j < Y->columns; j++)
 		{
-			i32 d = (Y_PRED->z->data[i*Y->columns + j] - Y->data[i*Y->columns + j]);
+			double d = (Y_PRED->out->data[i*Y->columns + j] - Y->data[i*Y->columns + j]);
+			Y_PRED->db->data[i] += (2/(double)Y->columns) * d;
 		}
 	}
 }
