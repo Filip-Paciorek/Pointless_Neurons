@@ -3,6 +3,12 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <stdint.h>
+//size declarations
+#define INPUT_COLS 8
+#define TARGET_COLS 1
+#define TRAIN_SIZE 14318
+#define TEST_SIZE 3580
+#define TOTAL_ROWS 17898
 // type declarations
 typedef int8_t i8;
 typedef uint8_t u8;
