@@ -15,6 +15,7 @@ typedef struct {
 	matrix* b;
 	matrix* db;
 	matrix* z;
+	matrix* dz;
 	matrix* out;
 } Layer;
 
@@ -24,7 +25,8 @@ typedef struct {
 } Network;
 
 //function definitions
-
+void substract_matrices(matrix* mat1, matrix* mat2, matrix* sub_mat);
+void fill_matrix_with_value(matrix* mat1, double value);
 Layer* allocate_layer(u32 num_in, u32 num_out, u32 batch_size);
 void print_layer_weights(Layer* l);
 void print_layer_outputs(Layer* l);
@@ -41,8 +43,8 @@ void Sigmoid_activation(Layer* l);
 void initialize_network(Network* nn);
 //BACKPROP FUNCTIONS
 float MSE(matrix* Y, Layer* Y_PRED);
-void* MSE_derivative_W(matrix* Y,Layer* Y_PRED);
-void* MSE_derivative_b(matrix* Y,Layer* Y_PRED);
+void MSE_derivative_W(matrix* Y,Layer* Y_PRED);
+void MSE_derivative_b(matrix* Y,Layer* Y_PRED);
 void Gradient_Descent(Layer* l,matrix* Y,u32 learning_rate);
 int main()
 {
@@ -114,9 +116,51 @@ int main()
 	printf("Gradient db[0]: %f\n", l_test->db->data[0]);	
 	free_layer(l_test);
 	free_matrix(Y);
+	Y = allocate_matrix(1, 2); 
+	Y->data[0] = 1.0; Y->data[1] = 0.0;
+
+	Layer* lt = allocate_layer(2, 1, 2); 
+
+	lt->in->data[0] = 1.0; lt->in->data[1] = 0.0; 
+	lt->in->data[2] = 0.0; lt->in->data[3] = 1.0; 
+	lt->out->data[0] = 0.5; 
+	lt->out->data[1] = 0.5; 
+
+	MSE_derivative_W(Y, lt);
+
+	printf("Test dW[0][0]: %f (Oczekiwane: -0.5)\n", lt->dW->data[0]);
+	printf("Test dW[0][1]: %f (Oczekiwane: 0.5)\n", lt->dW->data[1]);
+
+	free_layer(lt);
+	free_matrix(Y);
 	return 1;
 }
+void substract_matrices(matrix* mat1, matrix* mat2,matrix* sub_mat)
+{
 
+	if ((mat1->rows != mat2->rows) || (mat1->columns != mat2->columns))
+	{
+		printf("Wrong matrix dimensions!");
+		return;
+	}
+	if ((mat1->rows != sub_mat->rows) || (mat1->columns != sub_mat->columns))
+	{
+		printf("Wrong matrix dimensions!");
+		return;
+	}
+
+	float sum = 0;
+	for (u32 i =0; i < mat1->rows; i++)
+	{
+		for (u32 j =0; j < mat2->columns; j++)
+		{
+			float a = mat1->data[i*mat1->columns +j];
+			float b = mat2->data[i*mat2->columns + j];
+			sub_mat->data[i*mat1->columns +j] = (float)a - (float)b;
+		}
+	
+	}
+}
 Layer* allocate_layer(u32 num_in,u32 num_out, u32 batch_size)
 {
 /* Using arguments num_in and num_out calculate the sizes of each element of the layer necessary */
@@ -137,6 +181,7 @@ Layer* allocate_layer(u32 num_in,u32 num_out, u32 batch_size)
 	l->db = allocate_matrix(l->num_out,1);
 	//for z we need the size of output * datapoints processed
 	l->z = allocate_matrix(l->num_out,batch_size);
+	l->dz = allocate_matrix(l->num_out,batch_size);
 	//we allocate space for the output neurons
 	l->out = allocate_matrix(l->num_out,batch_size);
 	return l;
@@ -195,6 +240,7 @@ void free_layer(Layer* l)
 	free_matrix(l->b);
 	free_matrix(l->db);
 	free_matrix(l->z);
+	free_matrix(l->dz);
 	free_matrix(l->out);
 	free(l);
 }
@@ -320,21 +366,98 @@ float MSE(matrix* Y, Layer* Y_PRED)
       }
 	return sum / (double)Y->columns;
 }
-void* MSE_derivative_W(matrix* Y, Layer* Y_PRED)
+void hadamard_multiply(matrix* mat1, matrix* mat2,matrix* mul_mat)
 {
-	return 0;
-}
-void* MSE_derivative_b(matrix* Y, Layer* Y_PRED)
-{
-	for(u32 k = 0; k < Y_PRED->db->rows;k++) Y_PRED->db->data[k] = 0;
-	for(u32 i = 0; i < Y->rows; i++)
+	for (u32 i = 0; i < mat1->rows*mat2->columns; i++)
 	{
-		for (u32 j = 0; j < Y->columns; j++)
+		mul_mat->data[i] = mat1->data[i]*mat2->data[i];
+	}
+}
+void fill_matrix_with_value(matrix* mat1, double value)
+{
+	for(u32 i = 0; i < mat1->rows*mat1->columns;i++)
+	{
+		mat1->data[i] = value;
+	}
+}
+void scale_matrix(matrix* mat1, double value,matrix* scale_mat)
+{
+	for(u32 i = 0; i < mat1->rows*mat1->columns; i++)
+	{
+		scale_mat->data[i] = mat1->data[i]*value;
+	}
+}
+void backpropagation(Network* nn, matrix* Y, float lr) {
+	//dz,dW,db for the last layer
+	Layer* last = nn->layers[nn->num_layers -1];
+	matrix* error = allocate_matrix(Y->rows,Y->columns);
+	matrix* ones = allocate_matrix(Y->rows,Y->columns);
+	matrix* t_out = allocate_matrix(Y->rows,Y->columns);
+	matrix* t_in = allocate_matrix(last->in->columns,last->in->rows);
+	transpose_matrix(last->in,t_in);
+	substract_matrices(last->out, Y,error);
+	fill_matrix_with_value(ones,1);
+	substract_matrices(ones,last->out,t_out);
+	hadamard_multiply(last->out,t_out,t_out);
+	hadamard_multiply(error,t_out,last->dz);
+	scale_matrix(last->dz,(2/(double)Y->columns),last->dz);
+	multiply_matrices(last->dz,t_in,last->dW);
+	for (u32 i = 0; i < last->num_out;i++)
+	{
+		float sum = 0;
+		for (int j =0; j < Y->columns;j++)
 		{
-			double d = (Y_PRED->out->data[i*Y->columns + j] - Y->data[i*Y->columns + j]);
-			Y_PRED->db->data[i] += (2/(double)Y->columns) * d;
+			sum += last->dz->data[i*Y->columns + j];
+		}
+		last->db->data[i] = sum;
+	}
+	free_matrix(error);
+	free_matrix(ones);
+	free_matrix(t_out);
+	free_matrix(t_in);
+	for(i32 i = nn->num_layers -2; i >=0; i--)
+	{
+		Layer* current = nn->layers[i];
+		Layer* next = nn->layers[i+1];
+		matrix* W_t = allocate_matrix(next->W->columns,next->W->rows);
+		transpose_matrix(next->W,W_t);
+     		multiply_matrices(W_t,next->dz,current->dz);
+		free_matrix(W_t);
+		for(u32 j = 0; j < current->num_out*current->z->columns;j++)
+		{
+			if (current->z->data[j] > 0)
+			{
+				continue;
+			}
+      			else
+			{
+				current->dz->data[j] = 0;
+			}
+		}
+		matrix* t_in = allocate_matrix(current->in->columns,current->in->rows);
+		transpose_matrix(current->in,t_in);
+		multiply_matrices(current->dz,t_in,current->dW);
+		free_matrix(t_in);
+		for (u32 k = 0; k < current->num_out;k++)
+		{
+			float sum = 0;
+			for (int j =0; j < Y->columns;j++)
+			{
+				sum += current->dz->data[k*Y->columns + j];
+			}
+			current->db->data[k] = sum;
 		}
 	}
+	for(u32 i = 0; i < nn->num_layers;i++)
+	{
+		scale_matrix(nn->layers[i]->dW,lr,nn->layers[i]->dW);
+		substract_matrices(nn->layers[i]->W,nn->layers[i]->dW,nn->layers[i]->W);
+		scale_matrix(nn->layers[i]->db,lr,nn->layers[i]->db);
+		substract_matrices(nn->layers[i]->b,nn->layers[i]->db,nn->layers[i]->b);
+
+	}
+		//W = W - lr*dW
+		//b = b - lr * db
 }
 i64 time_diff(struct timespec a, struct timespec b)
 {
