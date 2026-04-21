@@ -56,12 +56,15 @@ void standardize_z_score(matrix *mat){
             variation+=pow((mat->data[((k*INPUT_COLS))+i]-mean),2);
         }
     double deviation = sqrt(variation / TRAIN_SIZE);
-    for (u32 l = 0; l < TRAIN_SIZE; l++)
+    if (deviation>0.0000001){
+        for (u32 l = 0; l < TRAIN_SIZE; l++)
     {
         mat->data[(l*INPUT_COLS)+i] = (mat->data[((l*INPUT_COLS))+i]-mean)/deviation;
     }
     
     }
+    }
+    
 }
 
 
