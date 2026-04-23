@@ -38,8 +38,9 @@ i64 time_diff(struct timespec a, struct timespec b);
 
 FILE * File_open(char *file_name);
 void file_close(FILE *fptr);
-void load_data(char *filename,matrix *X,matrix *Y,matrix* X_t,matrix* Y_t)
+void load_data(char *filename,matrix *X,matrix *Y,matrix* X_t,matrix* Y_t);
 void parse_csv_line(char *line, matrix *X, matrix *Y, u32 row_index);
 void standardize_z_score(matrix *mat,matrix *mat_test);
 void normalize_min_max(matrix *mat,matrix *mat_test);
+void save_matrix_to_csv(char *filename , matrix *mat);
 #endif
