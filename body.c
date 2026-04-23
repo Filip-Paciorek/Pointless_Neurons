@@ -112,6 +112,22 @@ void normalize_min_max(matrix *mat,matrix *mat_test){
 
     }
 }
+void save_matrix_to_csv(char *filename , matrix *mat){
+    FILE *fptr = File_open(filename,"w");
+    for (u32 i = 0; i < mat->rows; i++)
+    {
+        fprintf(fptr,"%.4f",mat->data[(i*mat->columns)+0]);
+        for (u32 j = 1; j < mat->columns; j++)
+        {
+            fprintf(fptr,",%.4f",mat->data[(i*mat->columns)+j]);
+        }
+        fprintf(fptr,"\n");
+        
+    }
+    file_close(fptr);
+    
+}
+
 
 
 
