@@ -39,5 +39,5 @@ i64 time_diff(struct timespec a, struct timespec b);
 FILE * File_open(char *file_name);
 void file_close(FILE *fptr);
 void parse_csv_line(char *line, matrix *X, matrix *Y, u32 row_index);
-void standardize_z_score(matrix *mat);
+void standardize_z_score(matrix *mat,matrix *mat_test);
 #endif
