@@ -20,6 +20,29 @@ FILE * File_open(char *file_name){
 void file_close(FILE *fptr){
     fclose(fptr);
 }
+void load_data(char *filename,matrix *X,matrix *Y,matrix* X_t,matrix* Y_t){
+    FILE *fptr = File_open(filename,"r");
+    char line[1024];
+    u32 row_index = 0;
+    if (fptr == NULL)
+    {
+        printf("ERROR");
+        return;
+    }
+
+    while (fgets(line,sizeof(line),fptr)!=NULL){
+         
+        if (row_index < TRAIN_SIZE)
+        {
+            parse_csv_line(line,X,Y,row_index);
+
+        }
+        else{
+            parse_csv_line(line,X_t,Y_t,row_index-TRAIN_SIZE);
+        }
+        row_index += 1;}
+    file_close(fptr);
+}
 void parse_csv_line(char *line, matrix *X, matrix *Y, u32 row_index){
     const char s[4]=",";
     char *tok;
