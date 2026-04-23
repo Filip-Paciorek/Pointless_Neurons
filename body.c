@@ -87,8 +87,30 @@ void standardize_z_score(matrix *mat,matrix *mat_test){
             mat_test->data[(INPUT_COLS*m)+i] = (mat_test->data[(INPUT_COLS*m)+i]-mean)/deviation;
     }
     }
+}   
 }
+void normalize_min_max(matrix *mat,matrix *mat_test){
     
+    for (u32 i = 0; i < INPUT_COLS; i++){
+        double max = mat->data[i];
+        double min = mat->data[i];
+        for (u32 j = 1; j < TRAIN_SIZE; j++){
+            if (mat->data[(j*INPUT_COLS)+i]>max) max = mat->data[(j*INPUT_COLS)+i];
+            if (mat->data[(j*INPUT_COLS)+i]<min) min = mat->data[(j*INPUT_COLS)+i];
+        }
+        double diff = max - min;
+        if (diff >0.0000001){
+            for (u32 l = 0; l < TRAIN_SIZE; l++)
+            {
+                mat->data[(INPUT_COLS*l)+i] = (mat->data[(INPUT_COLS*l)+i]-min)/diff;
+            }
+            for (u32 m = 0;m < TEST_SIZE; m++)
+            {
+                mat_test->data[(INPUT_COLS*m)+i] = (mat_test->data[(INPUT_COLS*m)+i]-min)/diff;
+            }
+        }
+
+    }
 }
 
 
