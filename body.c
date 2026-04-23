@@ -51,7 +51,7 @@ void parse_csv_line(char *line, matrix *X, matrix *Y, u32 row_index){
     while (tok!=NULL)
     {   
         double val = atof(tok);
-        if (col_index<8)
+        if (col_index<INPUT_COLS)
         {
             X->data[((row_index*INPUT_COLS)+col_index)] = val;
         }
