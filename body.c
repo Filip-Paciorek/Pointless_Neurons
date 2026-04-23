@@ -30,18 +30,16 @@ void parse_csv_line(char *line, matrix *X, matrix *Y, u32 row_index){
         double val = atof(tok);
         if (col_index<8)
         {
-            X->data[((row_index*8)+col_index)] = val;
+            X->data[((row_index*INPUT_COLS)+col_index)] = val;
         }
-        else if (col_index==8)
+        else if (col_index==INPUT_COLS)
         {
-            Y->data[row_index] = val;
+            Y->data[(row_index*Y->columns)] = val;
         }
         tok = strtok(NULL,s);
         col_index+=1;
         
     }
-    
-    
 }
 void standardize_z_score(matrix *mat){
 
