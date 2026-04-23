@@ -41,7 +41,7 @@ void parse_csv_line(char *line, matrix *X, matrix *Y, u32 row_index){
         
     }
 }
-void standardize_z_score(matrix *mat){
+void standardize_z_score(matrix *mat,matrix *mat_test){
 
     for (u32 i = 0; i < INPUT_COLS; i++){
     double sum = 0.0;
@@ -59,9 +59,12 @@ void standardize_z_score(matrix *mat){
     {
         mat->data[(l*INPUT_COLS)+i] = (mat->data[((l*INPUT_COLS))+i]-mean)/deviation;
     }
-    
+        for (u32 m = 0;m < TEST_SIZE; m++)
+    {   
+            mat_test->data[(INPUT_COLS*m)+i] = (mat_test->data[(INPUT_COLS*m)+i]-mean)/deviation;
     }
     }
+}
     
 }
 
