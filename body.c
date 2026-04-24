@@ -4,10 +4,10 @@
 #include <math.h>
 #include "nn.h"
 
-FILE * File_open(char *file_name){
+FILE * File_open(char *file_name,char *action){
     FILE *fptr;
 
-    fptr = fopen(file_name,"r");
+    fptr = fopen(file_name,action);
 
     if (fptr == NULL)
     {
