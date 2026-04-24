@@ -36,7 +36,7 @@ void print_matrix(matrix* mat);
 void fill_matrix(matrix* mat, int start, int end);
 i64 time_diff(struct timespec a, struct timespec b);
 
-FILE * File_open(char *file_name);
+FILE * File_open(char *file_name,char *action);
 void file_close(FILE *fptr);
 void load_data(char *filename,matrix *X,matrix *Y,matrix* X_t,matrix* Y_t);
 void parse_csv_line(char *line, matrix *X, matrix *Y, u32 row_index);
