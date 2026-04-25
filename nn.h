@@ -3,6 +3,12 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <stdint.h>
+//size declarations
+#define INPUT_COLS 8
+#define TARGET_COLS 1
+#define TRAIN_SIZE 14318
+#define TEST_SIZE 3580
+#define TOTAL_ROWS 17898
 // type declarations
 typedef int8_t i8;
 typedef uint8_t u8;
@@ -29,4 +35,12 @@ void free_matrix(matrix* mat);
 void print_matrix(matrix* mat);
 void fill_matrix(matrix* mat, int start, int end);
 i64 time_diff(struct timespec a, struct timespec b);
+
+FILE * File_open(char *file_name,char *action);
+void file_close(FILE *fptr);
+void load_data(char *filename,matrix *X,matrix *Y,matrix* X_t,matrix* Y_t);
+void parse_csv_line(char *line, matrix *X, matrix *Y, u32 row_index);
+void standardize_z_score(matrix *mat,matrix *mat_test);
+void normalize_min_max(matrix *mat,matrix *mat_test);
+void save_matrix_to_csv(char *filename , matrix *mat);
 #endif
