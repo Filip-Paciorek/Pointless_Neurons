@@ -64,6 +64,7 @@ void parse_csv_line(char *line, matrix *X, matrix *Y, u32 row_index){
         
     }
 }
+
 void standardize_z_score(matrix *mat,matrix *mat_test){
 
     for (u32 i = 0; i < INPUT_COLS; i++){
