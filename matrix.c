@@ -116,6 +116,25 @@ void add_matrices(matrix* mat1, matrix* mat2,matrix* add_mat)
 	
 	}
 }
+void substract_matrices(matrix* mat1, matrix* mat2, matrix* sub_mat)
+{
+    /*Substract mat2 from mat1*/ 
+    if ((mat1->rows != mat2->rows) || (mat1->columns != mat2->columns) ||
+        (mat1->rows != sub_mat->rows) || (mat1->columns != sub_mat->columns)) 
+    {
+        printf("Wrong matrix dimensions in substract_matrices!");
+        return;
+    }
+    for (u32 i = 0; i < mat1->rows; i++)
+    {
+        for (u32 j = 0; j < mat1->columns; j++) 
+	{
+            float a = mat1->data[i * mat1->columns + j];
+            float b = mat2->data[i * mat2->columns + j];
+            sub_mat->data[i * mat1->columns + j] = (float)a - (float)b;
+	}
+    }
+}
 void add_vector_to_matrix(matrix* mat, matrix* vec, matrix* add_mat)
 {
 	if(mat->columns != vec->columns)

@@ -5,19 +5,6 @@
 #include "nn.h"
 #include "brain.h"
 
-void copy_to_matrix(matrix* mat1, float* data, float data_rows, float data_columns)
-{
-    /*Changes an array into a matrix structure*/
-    if (data_rows != mat1->rows || data_columns != mat1->columns) 
-	{
-        printf("Wrong dimensions for {copy_to_matrix}");
-        return;
-    }
-    for (u32 i = 0; i < mat1->rows * mat1->columns; i++)
-    {
-        mat1->data[i] = data[i];
-    }
-}
 void slice_matrix_columns(matrix* src, matrix* dst, u32 start, u32 size)
 {
     /*slices the matrix into smaller parts, allowing for mini-batch SGD*/
@@ -173,25 +160,6 @@ void print_result(Network* nn, matrix* X_test, matrix* Y_test)
     printf("Recall:    %.2f%%\n", recall*100);
     printf("F1-Score:  %.4f\n",   f1);
 }
-void substract_matrices(matrix* mat1, matrix* mat2, matrix* sub_mat)
-{
-    /*Substract mat2 from mat1*/ 
-    if ((mat1->rows != mat2->rows) || (mat1->columns != mat2->columns) ||
-        (mat1->rows != sub_mat->rows) || (mat1->columns != sub_mat->columns)) 
-    {
-        printf("Wrong matrix dimensions in substract_matrices!");
-        return;
-    }
-    for (u32 i = 0; i < mat1->rows; i++)
-    {
-        for (u32 j = 0; j < mat1->columns; j++) 
-	{
-            float a = mat1->data[i * mat1->columns + j];
-            float b = mat2->data[i * mat2->columns + j];
-            sub_mat->data[i * mat1->columns + j] = (float)a - (float)b;
-	}
-    }
-}
 
 Layer* allocate_layer(u32 num_in, u32 num_out, u32 batch_size)
 {
@@ -246,6 +214,7 @@ void add_bias_to_z(matrix* z, matrix* b)
 
 void calculate_layer(Layer* l, matrix* input)
 {
+    //calculate z 
     multiply_matrices(l->W, input, l->z);
     add_bias_to_z(l->z, l->b);
 }
@@ -265,10 +234,13 @@ void free_layer(Layer* l)
 
 Network* create_network_structure(u32* arr, u32 num_layers, u32 batch_size)
 {
-	
+    /* Creates empty network structure */
+    //allocate space for network pointer
     Network* nn = malloc(sizeof(*nn));
     nn->num_layers = num_layers - 1;
+    //for each layer pointer allocate space
     nn->layers = malloc(nn->num_layers * sizeof(Layer*));
+    //for each layer allocate space
     for (int i = 0; i < nn->num_layers; i++)
     {
         nn->layers[i] = allocate_layer(arr[i], arr[i+1], batch_size);
@@ -286,6 +258,7 @@ void print_network_params(Network* nn)
 
 void free_network(Network* nn)
 {
+    /* Frees all the memory allocated for network*/
     for (int i = 0; i < nn->num_layers; i++)
     {
         free_layer(nn->layers[i]);
@@ -296,6 +269,7 @@ void free_network(Network* nn)
 
 void b_initialization(Layer* l)
 {
+    /* Fills up the b param with 0*/
     fill_matrix_with_value(l->b, 0.0);
 }
 
@@ -343,6 +317,7 @@ void Sigmoid_activation(Layer* l)
 
 void initialize_network(Network* nn)
 {
+    /*Fills up the initialized structure of weights and bias*/
     for (int i = 0; i < nn->num_layers; i++) 
     {
         Xavier_initialization(nn->layers[i]);
@@ -352,6 +327,7 @@ void initialize_network(Network* nn)
 
 float MSE(matrix* Y, Layer* Y_PRED)
 {
+    /*Calculates the squared error between the predicted value and the real value*/
     if (Y->rows != Y_PRED->out->rows || Y->columns != Y_PRED->out->columns)
     {
         return -1;
