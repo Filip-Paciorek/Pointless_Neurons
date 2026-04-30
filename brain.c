@@ -5,42 +5,6 @@
 #include "nn.h"
 #include "brain.h"
 
-void slice_matrix_columns(matrix* src, matrix* dst, u32 start, u32 size)
-{
-    /*slices the matrix into smaller parts, allowing for mini-batch SGD*/
-    for (u32 r = 0; r < src->rows; r++)
-    {
-        for (u32 c = 0; c < size; c++)
-	{
-            dst->data[r * size + c] = src->data[r * src->columns + (start + c)];
-    	}
-    }
-}
-void feedforward(Network* nn, matrix* X)
-{
-   /*Populates the network going through it for the first time*/
-    //make sure X doesnt get redefined
-    matrix* current_input = X;
-    
-    for (int i = 0; i < nn->num_layers; i++) 
-	{
-        //set the current input as our in for this layer
-	nn->layers[i]->in = current_input;
-	// calculate z
-        calculate_layer(nn->layers[i], current_input);
-        //check if it should be ReLU or Sigmoid BUT we switched it to just sigmoid because it performed better
-	if (i < nn->num_layers - 1)
-	{
-            Sigmoid_activation(nn->layers[i]);
-	}
-        else
-	{
-            Sigmoid_activation(nn->layers[i]);
-	}
-	//after activation set the output as our new input
-        current_input = nn->layers[i]->out;
-    }
-}
 
 void train(Network* nn, matrix* X, matrix* Y, float lr, u32 epochs, u32 batch_size)
 {
@@ -116,90 +80,9 @@ matrix* predict(Network* nn, matrix* X)
     return current_output;
 }
 
-void print_result(Network* nn, matrix* X_test, matrix* Y_test)
-{
-    /*function written by ai to test out results (waiting for maks's implementation)*/
-    matrix* out = predict(nn, X_test);
 
-    int tp = 0, tn = 0, fp = 0, fn = 0;
-    for (u32 i = 0; i < X_test->columns; i++) 
-    {
-        int predicted = (out->data[i] >= 0.5f) ? 1 : 0;
-        int actual    = (int)Y_test->data[i];
-        if(predicted == 1 && actual == 1)
-	{
-	    tp++;
-	}
-        else if(predicted == 0 && actual == 0)
-	{
-	    tn++;
-	}
-        else if(predicted == 1 && actual == 0)
-	{
-	    fp++;
-	}
-        else if(predicted == 0 && actual == 1)
-	{
-	    fn++;
-	}
-    }
-    free_matrix(out);
 
-    float precision = (float)tp / (tp + fp + 1e-7f);
-    float recall    = (float)tp / (tp + fn + 1e-7f);
-    float f1        = 2.0f * precision * recall / (precision + recall + 1e-7f);
 
-    printf("\n--- Confusion Matrix ---\n");
-    printf("Actual \\ Pred |  Pulsar (1)  |   Noise (0)  |\n");
-    printf("--------------|--------------|--------------|\n");
-    printf("Pulsar (1)    | %12d | %12d | (Recall: %.2f%%)\n", tp, fn, recall*100);
-    printf("Noise  (0)    | %12d | %12d | (Spec:   %.2f%%)\n", fp, tn, (float)tn/(tn+fp+1e-7f)*100);
-    printf("\n--- Metrics ---\n");
-    printf("Accuracy:  %.2f%%\n", (float)(tp+tn) / X_test->columns * 100);
-    printf("Precision: %.2f%%\n", precision*100);
-    printf("Recall:    %.2f%%\n", recall*100);
-    printf("F1-Score:  %.4f\n",   f1);
-}
-
-Layer* allocate_layer(u32 num_in, u32 num_out, u32 batch_size)
-{
-    /*Allocate memory for all the parts owned by the layer*/
-    Layer* l = malloc(sizeof(*l));
-    l->num_in  = num_in;
-    l->num_out = num_out;
-    //NOT owned by layer
-    l->in  = NULL; 
-    l->W   = allocate_matrix(num_out, num_in);
-    l->dW  = allocate_matrix(num_out, num_in);
-    l->b   = allocate_matrix(num_out, 1);
-    l->db  = allocate_matrix(num_out, 1);
-    l->z   = allocate_matrix(num_out, batch_size);
-    l->dz  = allocate_matrix(num_out, batch_size);
-    l->out = allocate_matrix(num_out, batch_size);
-    return l;
-}
-
-void print_layer_weights(Layer* l)
-{
-    /*Prints layer weights*/
-    for (int i = 0; i < l->W->rows; i++) 
-    {
-        for (int j = 0; j < l->W->columns; j++)
-	{
-            printf("%f ", l->W->data[i * l->W->columns + j]);
-            printf("\n");
-    	}
-    }
-}
-
-void print_layer_outputs(Layer* l)
-{
-    for (int i = 0; i < l->num_out; i++)
-    {
-        printf("%f ", l->z->data[i]);
-    }
-    printf("\n");
-}
 
 void add_bias_to_z(matrix* z, matrix* b)
 {
@@ -219,83 +102,10 @@ void calculate_layer(Layer* l, matrix* input)
     add_bias_to_z(l->z, l->b);
 }
 
-void free_layer(Layer* l)
-{
-    // free every part owned by the layer
-    free_matrix(l->W);
-    free_matrix(l->dW);
-    free_matrix(l->b);
-    free_matrix(l->db);
-    free_matrix(l->z);
-    free_matrix(l->dz);
-    free_matrix(l->out);
-    free(l);
-}
 
-Network* create_network_structure(u32* arr, u32 num_layers, u32 batch_size)
-{
-    /* Creates empty network structure */
-    //allocate space for network pointer
-    Network* nn = malloc(sizeof(*nn));
-    nn->num_layers = num_layers - 1;
-    //for each layer pointer allocate space
-    nn->layers = malloc(nn->num_layers * sizeof(Layer*));
-    //for each layer allocate space
-    for (int i = 0; i < nn->num_layers; i++)
-    {
-        nn->layers[i] = allocate_layer(arr[i], arr[i+1], batch_size);
-    }
-    return nn;
-}
 
-void print_network_params(Network* nn)
-{
-    for (int i = 0; i < nn->num_layers; i++)
-    {
-        printf("Layer %d - in: %d out: %d\n", i, nn->layers[i]->num_in, nn->layers[i]->num_out);
-    }
-}
 
-void free_network(Network* nn)
-{
-    /* Frees all the memory allocated for network*/
-    for (int i = 0; i < nn->num_layers; i++)
-    {
-        free_layer(nn->layers[i]);
-    }
-    free(nn->layers);
-    free(nn);
-}
 
-void b_initialization(Layer* l)
-{
-    /* Fills up the b param with 0*/
-    fill_matrix_with_value(l->b, 0.0);
-}
-
-void He_initialization(Layer* l)
-{
-    double limit = sqrt(2.0 / l->num_in);
-    for (int i = 0; i < l->W->rows; i++)
-    {
-        for (int j = 0; j < l->W->columns; j++)
-	{
-            l->W->data[i * l->W->columns + j] = (((double)rand() / RAND_MAX) * 2 * limit) - limit;
-	}
-    }
-}
-
-void Xavier_initialization(Layer* l)
-{
-    float limit = sqrtf(6.0f / (l->num_in + l->num_out));
-    for (int i = 0; i < l->W->rows; i++)
-    {
-        for (int j = 0; j < l->W->columns; j++)
-	{
-            l->W->data[i * l->W->columns + j] = (((double)rand() / RAND_MAX) * 2 * limit) - limit;
-	}
-    }
-}
 
 void ReLU_activation(Layer* l)
 {
@@ -315,15 +125,6 @@ void Sigmoid_activation(Layer* l)
     }
 }
 
-void initialize_network(Network* nn)
-{
-    /*Fills up the initialized structure of weights and bias*/
-    for (int i = 0; i < nn->num_layers; i++) 
-    {
-        Xavier_initialization(nn->layers[i]);
-        b_initialization(nn->layers[i]);
-    }
-}
 
 float MSE(matrix* Y, Layer* Y_PRED)
 {
@@ -351,23 +152,6 @@ void hadamard_multiply(matrix* mat1, matrix* mat2, matrix* mul_mat)
     }
 }
 
-void fill_matrix_with_value(matrix* mat1, double value)
-{
-    u32 n = mat1->rows * mat1->columns;
-    for (u32 i = 0; i < n; i++)
-    {
-        mat1->data[i] = (float)value;
-    }
-}
-
-void scale_matrix(matrix* mat1, double value, matrix* scale_mat)
-{
-    u32 n = mat1->rows * mat1->columns;
-    for (u32 i = 0; i < n; i++)
-    {
-        scale_mat->data[i] = (float)(mat1->data[i] * value);
-    }
-}
 
 void Sigmoid_derivative(Layer* l)
 {
@@ -460,6 +244,201 @@ void backpropagation(Network* nn, matrix* Y, float lr)
     }
 }
 
+void feedforward(Network* nn, matrix* X)
+{
+   /*Populates the network going through it for the first time*/
+    //make sure X doesnt get redefined
+    matrix* current_input = X;
+    
+    for (int i = 0; i < nn->num_layers; i++) 
+	{
+        //set the current input as our in for this layer
+	nn->layers[i]->in = current_input;
+	// calculate z
+        calculate_layer(nn->layers[i], current_input);
+        //check if it should be ReLU or Sigmoid BUT we switched it to just sigmoid because it performed better
+	if (i < nn->num_layers - 1)
+	{
+            Sigmoid_activation(nn->layers[i]);
+	}
+        else
+	{
+            Sigmoid_activation(nn->layers[i]);
+	}
+	//after activation set the output as our new input
+        current_input = nn->layers[i]->out;
+    }
+}
+//------------------------------Network initialization--------------------------//
+void initialize_network(Network* nn)
+{
+    /*Fills up the initialized structure of weights and bias*/
+    for (int i = 0; i < nn->num_layers; i++) 
+    {
+        Xavier_initialization(nn->layers[i]);
+        b_initialization(nn->layers[i]);
+    }
+}
+void b_initialization(Layer* l)
+{
+    /* Fills up the b param with 0*/
+    fill_matrix_with_value(l->b, 0.0);
+}
+
+void He_initialization(Layer* l)
+{
+    double limit = sqrt(2.0 / l->num_in);
+    for (int i = 0; i < l->W->rows; i++)
+    {
+        for (int j = 0; j < l->W->columns; j++)
+	{
+            l->W->data[i * l->W->columns + j] = (((double)rand() / RAND_MAX) * 2 * limit) - limit;
+	}
+    }
+}
+
+void Xavier_initialization(Layer* l)
+{
+    float limit = sqrtf(6.0f / (l->num_in + l->num_out));
+    for (int i = 0; i < l->W->rows; i++)
+    {
+        for (int j = 0; j < l->W->columns; j++)
+	{
+            l->W->data[i * l->W->columns + j] = (((double)rand() / RAND_MAX) * 2 * limit) - limit;
+	}
+    }
+}
+//------------------------------Memory allocation and structure creation--------------------------//
+Network* create_network_structure(u32* arr, u32 num_layers, u32 batch_size)
+{
+    /* Creates empty network structure */
+    //allocate space for network pointer
+    Network* nn = malloc(sizeof(*nn));
+    nn->num_layers = num_layers - 1;
+    //for each layer pointer allocate space
+    nn->layers = malloc(nn->num_layers * sizeof(Layer*));
+    //for each layer allocate space
+    for (int i = 0; i < nn->num_layers; i++)
+    {
+        nn->layers[i] = allocate_layer(arr[i], arr[i+1], batch_size);
+    }
+    return nn;
+}
+Layer* allocate_layer(u32 num_in, u32 num_out, u32 batch_size)
+{
+    /*Allocate memory for all the parts owned by the layer*/
+    Layer* l = malloc(sizeof(*l));
+    l->num_in  = num_in;
+    l->num_out = num_out;
+    //NOT owned by layer
+    l->in  = NULL; 
+    l->W   = allocate_matrix(num_out, num_in);
+    l->dW  = allocate_matrix(num_out, num_in);
+    l->b   = allocate_matrix(num_out, 1);
+    l->db  = allocate_matrix(num_out, 1);
+    l->z   = allocate_matrix(num_out, batch_size);
+    l->dz  = allocate_matrix(num_out, batch_size);
+    l->out = allocate_matrix(num_out, batch_size);
+    return l;
+}
+//------------------------------Memory release--------------------------//
+void free_network(Network* nn)
+{
+    /* Frees all the memory allocated for network*/
+    for (int i = 0; i < nn->num_layers; i++)
+    {
+        free_layer(nn->layers[i]);
+    }
+    free(nn->layers);
+    free(nn);
+}
+void free_layer(Layer* l)
+{
+    // free every part owned by the layer
+    free_matrix(l->W);
+    free_matrix(l->dW);
+    free_matrix(l->b);
+    free_matrix(l->db);
+    free_matrix(l->z);
+    free_matrix(l->dz);
+    free_matrix(l->out);
+    free(l);
+}
+//------------------------------Result printing and debug printing--------------------------//
+void print_result(Network* nn, matrix* X_test, matrix* Y_test)
+{
+    /*function written by ai to test out results (waiting for maks's implementation)*/
+    matrix* out = predict(nn, X_test);
+
+    int tp = 0, tn = 0, fp = 0, fn = 0;
+    for (u32 i = 0; i < X_test->columns; i++) 
+    {
+        int predicted = (out->data[i] >= 0.5f) ? 1 : 0;
+        int actual    = (int)Y_test->data[i];
+        if(predicted == 1 && actual == 1)
+	{
+	    tp++;
+	}
+        else if(predicted == 0 && actual == 0)
+	{
+	    tn++;
+	}
+        else if(predicted == 1 && actual == 0)
+	{
+	    fp++;
+	}
+        else if(predicted == 0 && actual == 1)
+	{
+	    fn++;
+	}
+    }
+    free_matrix(out);
+
+    float precision = (float)tp / (tp + fp + 1e-7f);
+    float recall    = (float)tp / (tp + fn + 1e-7f);
+    float f1        = 2.0f * precision * recall / (precision + recall + 1e-7f);
+
+    printf("\n--- Confusion Matrix ---\n");
+    printf("Actual \\ Pred |  Pulsar (1)  |   Noise (0)  |\n");
+    printf("--------------|--------------|--------------|\n");
+    printf("Pulsar (1)    | %12d | %12d | (Recall: %.2f%%)\n", tp, fn, recall*100);
+    printf("Noise  (0)    | %12d | %12d | (Spec:   %.2f%%)\n", fp, tn, (float)tn/(tn+fp+1e-7f)*100);
+    printf("\n--- Metrics ---\n");
+    printf("Accuracy:  %.2f%%\n", (float)(tp+tn) / X_test->columns * 100);
+    printf("Precision: %.2f%%\n", precision*100);
+    printf("Recall:    %.2f%%\n", recall*100);
+    printf("F1-Score:  %.4f\n",   f1);
+}
+
+void print_layer_weights(Layer* l)
+{
+    /*Prints layer weights*/
+    for (int i = 0; i < l->W->rows; i++) 
+    {
+        for (int j = 0; j < l->W->columns; j++)
+	{
+            printf("%f ", l->W->data[i * l->W->columns + j]);
+            printf("\n");
+    	}
+    }
+}
+
+void print_network_params(Network* nn)
+{
+    for (int i = 0; i < nn->num_layers; i++)
+    {
+        printf("Layer %d - in: %d out: %d\n", i, nn->layers[i]->num_in, nn->layers[i]->num_out);
+    }
+}
+void print_layer_outputs(Layer* l)
+{
+    for (int i = 0; i < l->num_out; i++)
+    {
+        printf("%f ", l->z->data[i]);
+    }
+    printf("\n");
+}
+//------------------------------Other--------------------------//
 i64 time_diff(struct timespec a, struct timespec b)
 {
     return ((b.tv_sec - a.tv_sec) * 1000000000LL + (b.tv_nsec - a.tv_nsec));

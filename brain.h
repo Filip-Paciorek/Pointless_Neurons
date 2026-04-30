@@ -16,6 +16,7 @@ typedef struct {
 	u32 num_layers;
 	Layer** layers;
 } Network;
+
 void ReLU_derivative(Layer* l, u32 rows, u32 columns);
 void substract_matrices(matrix* mat1, matrix* mat2, matrix* sub_mat);
 void copy_to_matrix(matrix* mat1, float* data,float data_rows, float data_columns);

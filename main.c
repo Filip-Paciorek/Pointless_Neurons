@@ -32,7 +32,7 @@ int main()
     transpose_matrix(X_test_raw,X_test);
     transpose_matrix(Y_test_raw,Y_test);
     // Input: 8, Hidden: 16, Output: 1
-    u32 layers_config[] = {8, 16, 1};
+    u32 layers_config[] = {8, 32, 1};
     //batch size	
     u32 batch_size = 32;
     //create the network struct
@@ -40,7 +40,7 @@ int main()
 
     //Train
     printf("Starting training on Pulsar Dataset...\n");
-    train(nn, X_train, Y_train, 2, 100000,batch_size);
+    train(nn, X_train, Y_train, 2, 5000,batch_size);
     //print results (currently ai function until maks's implementation)
     print_result(nn,X_test,Y_test);
     // freeing
