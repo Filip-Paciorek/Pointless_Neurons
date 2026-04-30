@@ -31,6 +31,7 @@ void transpose_matrix(matrix* mat,matrix* mat_t);
 void slice_matrix_columns(matrix* src, matrix* dst, u32 start, u32 size);
 void multiply_matrices(matrix* mat1, matrix* mat2,matrix* mult_mat);
 void scale_matrix(matrix* mat1, double value, matrix* scale_mat);
+void hadamard_multiply(matrix* mat1, matrix* mat2, matrix* mul_mat);
 void add_matrices(matrix* mat1,matrix* mat2, matrix* add_mat);
 void add_vector_to_matrix(matrix* mat,matrix* vec,matrix* add_mat);
 void free_matrix(matrix* mat);

@@ -5,6 +5,7 @@
 #include "nn.h"
 #include "brain.h"
 
+//-----------------------------Main four steps of the network--------------------------//
 
 void train(Network* nn, matrix* X, matrix* Y, float lr, u32 epochs, u32 batch_size)
 {
@@ -38,130 +39,33 @@ void train(Network* nn, matrix* X, matrix* Y, float lr, u32 epochs, u32 batch_si
     free_matrix(X_batch);
     free_matrix(Y_batch);
 }
-matrix* predict(Network* nn, matrix* X)
+
+void feedforward(Network* nn, matrix* X)
 {
-    //make sure the X doesnt get changed 
+   /*Populates the network going through it for the first time*/
+    //make sure X doesnt get redefined
     matrix* current_input = X;
-    matrix* current_output = NULL;
-
-    //allocate space for z and out for each layer sized to X->columns
-    matrix** temps = malloc(nn->num_layers * 2 * sizeof(matrix*));
-
+    
     for (int i = 0; i < nn->num_layers; i++) 
-    {
-	//allocate memory for the temp z and out
-        Layer* l = nn->layers[i];
-        matrix* z_temp   = allocate_matrix(l->num_out, X->columns);
-        matrix* out_temp = allocate_matrix(l->num_out, X->columns);
-	//calculate z 
-        multiply_matrices(l->W, current_input, z_temp);
-        add_bias_to_z(z_temp, l->b);
-	//calculate the sigmoid
-        u32 n = z_temp->rows * z_temp->columns;
-        for (u32 j = 0; j < n; j++)
 	{
-            out_temp->data[j] = 1.0f / (1.0f + expf(-z_temp->data[j]));
+        //set the current input as our in for this layer
+	nn->layers[i]->in = current_input;
+	// calculate z
+        calculate_layer(nn->layers[i], current_input);
+        //check if it should be ReLU or Sigmoid BUT we switched it to just sigmoid because it performed better
+	if (i < nn->num_layers - 1)
+	{
+            Sigmoid_activation(nn->layers[i]);
 	}
-	//free temp
-        free_matrix(z_temp);
-	//free previous out_temp
-        if (i > 0)
+        else
 	{
-		free_matrix(current_input);
-	} 
-	//append to temps and update the current input and output
-        temps[i] = out_temp;
-        current_input = out_temp;
-        current_output = out_temp;
-    }
-    //free memory
-    free(temps);
-    //CALLER MUST FREE THIS!!!
-    return current_output;
-}
-
-
-
-
-
-void add_bias_to_z(matrix* z, matrix* b)
-{
-    for (u32 i = 0; i < z->columns; i++)
-    {
-        for (u32 j = 0; j < z->rows; j++)
-	{
-            z->data[j * z->columns + i] += b->data[j];
+            Sigmoid_activation(nn->layers[i]);
 	}
+	//after activation set the output as our new input
+        current_input = nn->layers[i]->out;
     }
 }
 
-void calculate_layer(Layer* l, matrix* input)
-{
-    //calculate z 
-    multiply_matrices(l->W, input, l->z);
-    add_bias_to_z(l->z, l->b);
-}
-
-
-
-
-
-
-void ReLU_activation(Layer* l)
-{
-    u32 all = l->z->rows * l->z->columns;
-    for (int i = 0; i < all; i++)
-    {
-        l->out->data[i] = l->z->data[i] > 0 ? l->z->data[i] : 0;
-    }
-}
-
-void Sigmoid_activation(Layer* l)
-{
-    u32 all = l->z->rows * l->z->columns;
-    for (int i = 0; i < all; i++)
-    {
-        l->out->data[i] = 1.0f / (1.0f + expf(-l->z->data[i]));
-    }
-}
-
-
-float MSE(matrix* Y, Layer* Y_PRED)
-{
-    /*Calculates the squared error between the predicted value and the real value*/
-    if (Y->rows != Y_PRED->out->rows || Y->columns != Y_PRED->out->columns)
-    {
-        return -1;
-    }
-    double sum = 0.0;
-    u32 n = Y->rows * Y->columns;
-    for (u32 i = 0; i < n; i++) 
-    {
-        double diff = Y_PRED->out->data[i] - Y->data[i];
-        sum += diff * diff;
-    }
-    return (float)(sum / Y->columns);
-}
-
-void hadamard_multiply(matrix* mat1, matrix* mat2, matrix* mul_mat)
-{
-    u32 n = mat1->rows * mat1->columns;
-    for (u32 i = 0; i < n; i++)
-    {
-        mul_mat->data[i] = mat1->data[i] * mat2->data[i];
-    }
-}
-
-
-void Sigmoid_derivative(Layer* l)
-{
-    u32 n = l->out->rows * l->out->columns;
-    for (u32 i = 0; i < n; i++) 
-    {
-        float a = l->out->data[i];
-        l->dz->data[i] *= a * (1.0f - a);
-    }
-}
 
 void backpropagation(Network* nn, matrix* Y, float lr)
 {
@@ -244,29 +148,112 @@ void backpropagation(Network* nn, matrix* Y, float lr)
     }
 }
 
-void feedforward(Network* nn, matrix* X)
+
+matrix* predict(Network* nn, matrix* X)
 {
-   /*Populates the network going through it for the first time*/
-    //make sure X doesnt get redefined
+    //make sure the X doesnt get changed 
     matrix* current_input = X;
-    
+    matrix* current_output = NULL;
+
+    //allocate space for z and out for each layer sized to X->columns
+    matrix** temps = malloc(nn->num_layers * 2 * sizeof(matrix*));
+
     for (int i = 0; i < nn->num_layers; i++) 
+    {
+	//allocate memory for the temp z and out
+        Layer* l = nn->layers[i];
+        matrix* z_temp   = allocate_matrix(l->num_out, X->columns);
+        matrix* out_temp = allocate_matrix(l->num_out, X->columns);
+	//calculate z 
+        multiply_matrices(l->W, current_input, z_temp);
+        add_bias_to_z(z_temp, l->b);
+	//calculate the sigmoid
+        u32 n = z_temp->rows * z_temp->columns;
+        for (u32 j = 0; j < n; j++)
 	{
-        //set the current input as our in for this layer
-	nn->layers[i]->in = current_input;
-	// calculate z
-        calculate_layer(nn->layers[i], current_input);
-        //check if it should be ReLU or Sigmoid BUT we switched it to just sigmoid because it performed better
-	if (i < nn->num_layers - 1)
-	{
-            Sigmoid_activation(nn->layers[i]);
+            out_temp->data[j] = 1.0f / (1.0f + expf(-z_temp->data[j]));
 	}
-        else
+	//free temp
+        free_matrix(z_temp);
+	//free previous out_temp
+        if (i > 0)
 	{
-            Sigmoid_activation(nn->layers[i]);
+		free_matrix(current_input);
+	} 
+	//append to temps and update the current input and output
+        temps[i] = out_temp;
+        current_input = out_temp;
+        current_output = out_temp;
+    }
+    //free memory
+    free(temps);
+    //CALLER MUST FREE THIS!!!
+    return current_output;
+}
+//-----------------------------Math functions for parts of calculations--------------------------//
+void add_bias_to_z(matrix* z, matrix* b)
+{
+    for (u32 i = 0; i < z->columns; i++)
+    {
+        for (u32 j = 0; j < z->rows; j++)
+	{
+            z->data[j * z->columns + i] += b->data[j];
 	}
-	//after activation set the output as our new input
-        current_input = nn->layers[i]->out;
+    }
+}
+
+void calculate_layer(Layer* l, matrix* input)
+{
+    //calculate z 
+    multiply_matrices(l->W, input, l->z);
+    add_bias_to_z(l->z, l->b);
+}
+
+void ReLU_activation(Layer* l)
+{
+    u32 all = l->z->rows * l->z->columns;
+    for (int i = 0; i < all; i++)
+    {
+        l->out->data[i] = l->z->data[i] > 0 ? l->z->data[i] : 0;
+    }
+}
+
+void Sigmoid_activation(Layer* l)
+{
+    u32 all = l->z->rows * l->z->columns;
+    for (int i = 0; i < all; i++)
+    {
+        l->out->data[i] = 1.0f / (1.0f + expf(-l->z->data[i]));
+    }
+}
+
+
+float MSE(matrix* Y, Layer* Y_PRED)
+{
+    /*Calculates the squared error between the predicted value and the real value*/
+    if (Y->rows != Y_PRED->out->rows || Y->columns != Y_PRED->out->columns)
+    {
+        return -1;
+    }
+    double sum = 0.0;
+    u32 n = Y->rows * Y->columns;
+    for (u32 i = 0; i < n; i++) 
+    {
+        double diff = Y_PRED->out->data[i] - Y->data[i];
+        sum += diff * diff;
+    }
+    return (float)(sum / Y->columns);
+}
+
+
+
+void Sigmoid_derivative(Layer* l)
+{
+    u32 n = l->out->rows * l->out->columns;
+    for (u32 i = 0; i < n; i++) 
+    {
+        float a = l->out->data[i];
+        l->dz->data[i] *= a * (1.0f - a);
     }
 }
 //------------------------------Network initialization--------------------------//

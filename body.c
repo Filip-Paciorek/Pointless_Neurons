@@ -4,7 +4,6 @@
 #include <math.h>
 #include <time.h>
 #include "nn.h"
-#include "brain.h"
 
 FILE * File_open(char *file_name,char *action){
     FILE *fptr;

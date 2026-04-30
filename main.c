@@ -5,7 +5,6 @@
 #include "nn.h"
 #include "brain.c"
 #include "body.c"
-void shuffle_data(matrix *X, matrix *Y);
 int main()
 {
     srand(time(NULL));
@@ -51,19 +50,4 @@ int main()
     free_network(nn);
 
     return 0;
-}
-void shuffle_data(matrix *X, matrix *Y) {
-    for (u32 i = X->rows - 1; i > 0; i--) {
-        u32 j = rand() % (i + 1);
-        
-        for (u32 k = 0; k < X->columns; k++) {
-            float temp = X->data[i * X->columns + k];
-            X->data[i * X->columns + k] = X->data[j * X->columns + k];
-            X->data[j * X->columns + k] = temp;
-        }
-        
-        float tempY = Y->data[i];
-        Y->data[i] = Y->data[j];
-        Y->data[j] = tempY;
-    }
 }

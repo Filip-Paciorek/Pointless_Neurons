@@ -169,6 +169,14 @@ void scale_matrix(matrix* mat1, double value, matrix* scale_mat)
     }
 }
 
+void hadamard_multiply(matrix* mat1, matrix* mat2, matrix* mul_mat)
+{
+    u32 n = mat1->rows * mat1->columns;
+    for (u32 i = 0; i < n; i++)
+    {
+        mul_mat->data[i] = mat1->data[i] * mat2->data[i];
+    }
+}
 
 void add_vector_to_matrix(matrix* mat, matrix* vec, matrix* add_mat)
 {
