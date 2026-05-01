@@ -18,6 +18,20 @@ void train(Network* nn, matrix* X, matrix* Y, float lr, u32 epochs, u32 batch_si
     matrix* X_batch = allocate_matrix(X->rows, batch_size);
     matrix* Y_batch = allocate_matrix(Y->rows, batch_size);
     //for each epoch iterate over all the batches
+    
+    matrix* error = allocate_matrix(Y->rows, batch_size);
+    matrix* ones  = allocate_matrix(Y->rows, batch_size);
+    matrix* t_out = allocate_matrix(Y->rows, batch_size);
+    matrix* t_in  = allocate_matrix(batch_size, nn->layers[nn->num_layers-1]->num_in);
+    matrix** W_ts = malloc(nn->num_layers*sizeof(matrix*));
+    matrix** in_ts = malloc(nn->num_layers*sizeof(matrix*));
+    
+    for (u32 i =0; i < nn->num_layers;i++)
+    {
+	
+        in_ts[i] = allocate_matrix(batch_size,nn->layers[i]->num_in);
+	W_ts[i] = allocate_matrix(nn->layers[i]->num_in,nn->layers[i]->num_out);
+    }
     for (u32 e = 0; e < epochs; e++) 
     {
         for (u32 b = 0; b < n_batches; b++) 
@@ -27,7 +41,7 @@ void train(Network* nn, matrix* X, matrix* Y, float lr, u32 epochs, u32 batch_si
             slice_matrix_columns(Y, Y_batch, b * batch_size, batch_size);
             //do forward-backward motion on them
 	    feedforward(nn, X_batch);
-            backpropagation(nn, Y_batch, lr);
+            backpropagation(nn, Y_batch, lr,error,ones,t_out,t_in,W_ts,in_ts);
         }
 	//print loss for each 1000 epochs
         if (e % 1000 == 0)
@@ -36,6 +50,18 @@ void train(Network* nn, matrix* X, matrix* Y, float lr, u32 epochs, u32 batch_si
 	}
     }
     //free memory
+
+    free_matrix(error);
+    free_matrix(ones);
+    free_matrix(t_out);
+    free_matrix(t_in);
+    for (u32 i = 0; i < nn->num_layers;i++)
+	{
+		free_matrix(W_ts[i]);
+		free_matrix(in_ts[i]);
+	}
+    free(W_ts);
+    free(in_ts);
     free_matrix(X_batch);
     free_matrix(Y_batch);
 }
@@ -67,20 +93,19 @@ void feedforward(Network* nn, matrix* X)
 }
 
 
-void backpropagation(Network* nn, matrix* Y, float lr)
+void backpropagation(Network* nn, matrix* Y, float lr,matrix* error, matrix* ones,matrix* t_out,matrix* t_in,matrix** W_ts, matrix** in_ts)
 {
     Layer* last = nn->layers[nn->num_layers - 1];
     u32 batch_size = Y->columns;
     //allocate space
-    matrix* error = allocate_matrix(Y->rows, Y->columns);
-    matrix* ones  = allocate_matrix(Y->rows, Y->columns);
-    matrix* t_out = allocate_matrix(Y->rows, Y->columns);
-    matrix* t_in  = allocate_matrix(last->in->columns, last->in->rows);
 
     //reset gradients
     for (u32 i = 0; i < nn->num_layers; i++) 
     {
-        fill_matrix_with_value(nn->layers[i]->dW, 0.0);
+	
+        transpose_matrix(nn->layers[i]->W, W_ts[i]);
+	transpose_matrix(nn->layers[i]->in, in_ts[i]);
+	fill_matrix_with_value(nn->layers[i]->dW, 0.0);
         fill_matrix_with_value(nn->layers[i]->db, 0.0);
     }
 
@@ -105,10 +130,6 @@ void backpropagation(Network* nn, matrix* Y, float lr)
         last->db->data[i] = sum;
     }
 
-    free_matrix(error);
-    free_matrix(ones);
-    free_matrix(t_out);
-    free_matrix(t_in);
 
     //hidden layers
     for (i32 i = nn->num_layers - 2; i >= 0; i--) 
@@ -117,18 +138,18 @@ void backpropagation(Network* nn, matrix* Y, float lr)
         Layer* next    = nn->layers[i + 1];
 
         //propagate dz back
-        matrix* W_t = allocate_matrix(next->W->columns, next->W->rows);
-        transpose_matrix(next->W, W_t);
-        multiply_matrices(W_t, next->dz, current->dz);
-        free_matrix(W_t);
+        //matrix* W_t = allocate_matrix(next->W->columns, next->W->rows);
+        
+        multiply_matrices(W_ts[i+1], next->dz, current->dz);
+        //free_matrix(W_t);
 
         //multiply by sigmoid'
         Sigmoid_derivative(current);
 
-        matrix* t_in_curr = allocate_matrix(current->in->columns, current->in->rows);
-        transpose_matrix(current->in, t_in_curr);
-        multiply_matrices(current->dz, t_in_curr, current->dW);
-        free_matrix(t_in_curr);
+        //matrix* t_in_curr = allocate_matrix(current->in->columns, current->in->rows);
+       
+        multiply_matrices(current->dz, in_ts[i], current->dW);
+        //free_matrix(t_in_curr);
 
         for (u32 k = 0; k < current->num_out; k++) {
             float sum = 0;
@@ -223,7 +244,7 @@ void Sigmoid_activation(Layer* l)
     u32 all = l->z->rows * l->z->columns;
     for (int i = 0; i < all; i++)
     {
-        l->out->data[i] = 1.0f / (1.0f + expf(-l->z->data[i]));
+	l->out->data[i] = 1.0f / (1.0f + expf(-l->z->data[i]));
     }
 }
 

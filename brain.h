@@ -3,8 +3,10 @@ typedef struct {
 	u32 num_in;
 	u32 num_out;
 	matrix* in;
+	matrix* t_in;
 	matrix* W;
 	matrix* dW;
+	matrix* t_W;
 	matrix* b;
 	matrix* db;
 	matrix* z;
@@ -40,7 +42,7 @@ void initialize_network(Network* nn);
 //BACKPROP FUNCTIONS
 float MSE(matrix* Y, Layer* Y_PRED);
 void Gradient_Descent(Layer* l,matrix* Y,u32 learning_rate);
-void backpropagation(Network* nn, matrix* Y, float lr);
+void backpropagation(Network* nn, matrix* Y, float lr,matrix* error, matrix* ones,matrix* t_out,matrix* t_in,matrix** W_ts, matrix** in_ts);
 void train(Network* nn,matrix* X, matrix* Y, float lr, u32 epochs,u32 batch_size);
 void test(Network* nn, matrix* X_test, matrix* Y_test);
 void feedforward(Network* nn,matrix* X);
