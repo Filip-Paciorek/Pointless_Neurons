@@ -236,6 +236,51 @@ matrix* Oversampling(matrix *Train_x, matrix *Train_y, matrix *New_Y,u32 size ){
     }
     return New_X;
 }
+void data_profiling(matrix *X, matrix *Y){
+    u32 pulsars_counter = 0;
+    u32 noise_counters = 0;
+    double max_tab[8];
+    double min_tab[8];
+    double mean_tab[8];
+    for ( u32 i = 0; i < Y->rows; i++)
+    {
+        (Y->data[i] == 1) ? pulsars_counter++ : noise_counters ++; 
+    }
+    for (u32 i = 0; i < X->columns; i++)
+    {
+        double max = X->data[i];
+        double min = X->data[i];
+        double sum = 0.0;
+        for (u32 j = 0; j < X->rows; j++)
+        {   
+            sum+=X->data[(j*X->columns)+i];
+            if (X->data[(j*X->columns)+i]>max) max = X->data[(j*X->columns)+i];
+            if (X->data[(j*X->columns)+i]<min) min = X->data[(j*X->columns)+i];
+        }
+        double mean = sum / X->rows;
+        min_tab[i] = min;
+        max_tab[i] = max;
+        mean_tab[i] = mean;
+
+
+    }
+    printf("\n================ DATASET PROFILING ================\n");
+    for (u32 k = 0; k < X->columns; k+=2)
+    {
+        printf(" COL |    MIN     |    MAX     |    MEAN    || COL |    MIN     |    MAX     |    MEAN    \n");
+        printf("--------------------------------------------||--------------------------------------------\n");
+        printf(" [%u] |%10.4f |%10.4f |%13.4f || [%u] |%10.4f |%10.4f |%10.4f\n", k+1, min_tab[k], max_tab[k], mean_tab[k], 
+        k+2, min_tab[k+1], max_tab[k+1], mean_tab[k+1]);        
+        printf("--------------------------------------------||---------------------------------------------\n");
+    }
+        printf("Total Samples:  %u\n", Y->rows);
+        printf("Pulsars (1):    %u (%.2f%%)\n", pulsars_counter, (float)pulsars_counter / Y->rows * 100.0f);
+        printf("Noise (0):      %u (%.2f%%)\n", noise_counters, (float)noise_counters / Y->rows * 100.0f);
+    
+}
+
+
+
 
 
 
