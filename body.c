@@ -217,6 +217,25 @@ u32 oversampled_size(matrix *Train_Y){
     return noise_count * 2;
 
 }
+matrix* Oversampling(matrix *Train_x, matrix *Train_y, matrix *New_Y,u32 size ){
+    u32 current_row = Train_y->rows;
+    matrix *New_X = allocate_matrix(size,Train_x->columns);
+    copy_matrix(Train_x,New_X);
+    copy_matrix(Train_y,New_Y);
+    while (current_row < size)
+    {
+        u32 val = rand() % Train_y->rows;
+        if (Train_y->data[val] == 1){
+            New_Y->data[current_row] = 1;
+            for (u32 j = 0; j < Train_x->columns; j++)
+            {
+                New_X->data[(current_row*Train_x->columns)+j] = Train_x->data[(val*Train_x->columns)+j];
+            }
+            current_row+=1; 
+        }
+    }
+    return New_X;
+}
 
 
 
