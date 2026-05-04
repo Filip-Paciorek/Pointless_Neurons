@@ -193,6 +193,21 @@ void evaluate(Network *nn, matrix *test_X, matrix *test_Y){
     printf("Brier Score:%.4f   [ 0: Idealnie   | 0.25: Losowo |  1: Najgorzej]\n", BrierScore);
 
 }
+void copy_matrix(matrix *mat,matrix *copy_matrix){
+    if ((mat->rows*mat->columns)> (copy_matrix->rows*copy_matrix->columns) || mat->columns != copy_matrix->columns)
+    {
+        printf("Error, wrong copy_matrix allocation");
+        return;
+    }
+    else{
+        for (u32 i = 0; i < (mat->rows)*mat->columns; i++)
+    {
+        copy_matrix->data[i] = mat->data[i] ;
+    }
+    
+    }
+    
+}
 
 
 
