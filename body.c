@@ -208,6 +208,15 @@ void copy_matrix(matrix *mat,matrix *copy_matrix){
     }
     
 }
+u32 oversampled_size(matrix *Train_Y){
+    u32 noise_count = 0;
+    for (u32 i = 0; i < Train_Y->rows; i++)
+    {
+        if (Train_Y->data[i] == 0) noise_count+=1;
+    }
+    return noise_count * 2;
+
+}
 
 
 
