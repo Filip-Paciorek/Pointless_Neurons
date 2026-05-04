@@ -147,6 +147,50 @@ void shuffle_data(matrix * X,matrix *Y){
     }
 
 }
+void evaluate(Network *nn, matrix *test_X, matrix *test_Y){
+    u32 TP=0,TN=0,FP=0,FN=0;
+    float brier_sum = 0.0f;
+    
+    matrix *pred_val = predict(nn,test_X);
+    for (u32 i = 0; i < test_X->columns; i++)
+    {
+        if (pred_val->data[i]>=0.5 && test_Y->data[i]==1) TP+=1;
+        if (pred_val->data[i]<0.5 && test_Y->data[i]!=1) TN+=1;
+        if (pred_val->data[i]>=0.5 && test_Y->data[i]!=1) FP+=1;
+        if (pred_val->data[i]<0.5 && test_Y->data[i]==1) FN+=1;
+        brier_sum+=(pred_val->data[i]-test_Y->data[i])*(pred_val->data[i]-test_Y->data[i]);
+    }
+        free_matrix(pred_val); 
+    float  Accuracy = (float)(TP + TN) / (float)(TP + TN + FP +FN); 
+    float Precision = 0.0f;
+    float Recall = 0.0f;
+    float F1 = 0.0f;
+    float MCC = 0.0f;
+    float BrierScore = brier_sum/(float)(test_X->columns);
+
+    
+    if (TP + FP) Precision = (float)(TP) / (float)(TP + FP); 
+    
+    if (TP +  FN) Recall = (float)(TP) / (float)(TP +  FN);
+    
+    if (Precision + Recall > 0.0f) F1 = 2*(Precision*Recall)/(Precision+Recall);
+    
+
+    MCC = ((double)(TP*TN)-(double)(FP*FN))/(sqrt((double)(TP+FP)*(double)(TP+FN)*(double)(TN+FP)*(double)(TN+FN))+1e-7f);
+    printf("\n--- Confusion Matrix ---\n");
+    printf("Actual \\ Pred |  Pulsar (1)  |   Noise (0)  |\n");
+    printf("--------------|--------------|--------------|\n");
+    printf("Pulsar (1)    | \033[0;32m%12u\033[0m | \033[0;31m%12u\033[0m | (Recall: %.2f%%)\n", TP, FN, Recall*100);
+    printf("Noise  (0)    | \033[0;31m%12u\033[0m | \033[0;32m%12u\033[0m | (Spec:   %.2f%%)\n", FP, TN, (float)TN/(TN+FP+1e-7f)*100);
+    printf("\n--- Metrics ---\n");
+    printf("Accuracy:   %.2f%%\n", Accuracy * 100);
+    printf("Precision:  %.2f%%\n", Precision*100);
+    printf("Recall:     %.2f%%\n", Recall*100);
+    printf("F1-Score:   %.4f\n",   F1);
+    printf("MCC:        %.4f   [-1.0: Najgorzej | 0.0: Losowo | 1.0: Idealnie]\n", MCC);
+    printf("Brier Score:%.4f   [ 0: Idealnie   | 0.25: Losowo |  1: Najgorzej]\n", BrierScore);
+
+}
 
 
 
