@@ -47,4 +47,8 @@ void standardize_z_score(matrix *mat,matrix *mat_test);
 void normalize_min_max(matrix *mat,matrix *mat_test);
 void save_matrix_to_csv(char *filename , matrix *mat);
 void shuffle_data(matrix * X,matrix *Y);
+void copy_matrix(matrix *mat,matrix *copy_matrix);
+u32 oversampled_size(matrix *Train_Y);
+matrix* Oversampling(matrix *Train_x, matrix *Train_y, matrix *New_Y,u32 size );
+void data_profiling(matrix *X, matrix *Y);
 #endif
