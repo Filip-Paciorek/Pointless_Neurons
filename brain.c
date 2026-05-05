@@ -16,38 +16,37 @@ void train(Network* nn, matrix* X, matrix* Y, float lr, u32 epochs, u32 batch_si
     u32 n_batches = X->columns / batch_size;
     //allocate space for the batches
     matrix* X_batch = allocate_matrix(X->rows, batch_size);
-    matrix* Y_batch = allocate_matrix(Y->rows, batch_size);
-    //for each epoch iterate over all the batches
-    
+    matrix* Y_batch = allocate_matrix(Y->rows, batch_size);    
     matrix* error = allocate_matrix(Y->rows, batch_size);
     matrix* ones  = allocate_matrix(Y->rows, batch_size);
     matrix* t_out = allocate_matrix(Y->rows, batch_size);
     matrix* t_in  = allocate_matrix(batch_size, nn->layers[nn->num_layers-1]->num_in);
     matrix** W_ts = malloc(nn->num_layers*sizeof(matrix*));
     matrix** in_ts = malloc(nn->num_layers*sizeof(matrix*));
-    
+
     for (u32 i =0; i < nn->num_layers;i++)
     {
-	
+
         in_ts[i] = allocate_matrix(batch_size,nn->layers[i]->num_in);
-	W_ts[i] = allocate_matrix(nn->layers[i]->num_in,nn->layers[i]->num_out);
+        W_ts[i] = allocate_matrix(nn->layers[i]->num_in,nn->layers[i]->num_out);
     }
+    //for each epoch iterate over all the batches
     for (u32 e = 0; e < epochs; e++) 
     {
         for (u32 b = 0; b < n_batches; b++) 
-	{
-	    //slice into said batches
+        {
+            //slice into said batches
             slice_matrix_columns(X, X_batch, b * batch_size, batch_size);
             slice_matrix_columns(Y, Y_batch, b * batch_size, batch_size);
             //do forward-backward motion on them
-	    feedforward(nn, X_batch);
+            feedforward(nn, X_batch);
             backpropagation(nn, Y_batch, lr,error,ones,t_out,t_in,W_ts,in_ts);
         }
-	//print loss for each 1000 epochs
+        //print loss for each 1000 epochs
         if (e % 1000 == 0)
-	{
+        {
             printf("epoch %d loss: %f\n", e, MSE(Y_batch, nn->layers[nn->num_layers-1]));
-	}
+        }
     }
     //free memory
 
@@ -56,10 +55,10 @@ void train(Network* nn, matrix* X, matrix* Y, float lr, u32 epochs, u32 batch_si
     free_matrix(t_out);
     free_matrix(t_in);
     for (u32 i = 0; i < nn->num_layers;i++)
-	{
-		free_matrix(W_ts[i]);
-		free_matrix(in_ts[i]);
-	}
+    {
+        free_matrix(W_ts[i]);
+        free_matrix(in_ts[i]);
+    }
     free(W_ts);
     free(in_ts);
     free_matrix(X_batch);
@@ -68,26 +67,26 @@ void train(Network* nn, matrix* X, matrix* Y, float lr, u32 epochs, u32 batch_si
 
 void feedforward(Network* nn, matrix* X)
 {
-   /*Populates the network going through it for the first time*/
+    /*Populates the network going through it for the first time*/
     //make sure X doesnt get redefined
     matrix* current_input = X;
-    
+
     for (int i = 0; i < nn->num_layers; i++) 
-	{
+    {
         //set the current input as our in for this layer
-	nn->layers[i]->in = current_input;
-	// calculate z
+        nn->layers[i]->in = current_input;
+        // calculate z
         calculate_layer(nn->layers[i], current_input);
         //check if it should be ReLU or Sigmoid BUT we switched it to just sigmoid because it performed better
-	if (i < nn->num_layers - 1)
-	{
+        if (i < nn->num_layers - 1)
+        {
             Sigmoid_activation(nn->layers[i]);
-	}
+        }
         else
-	{
+    {
             Sigmoid_activation(nn->layers[i]);
-	}
-	//after activation set the output as our new input
+        }
+        //after activation set the output as our new input
         current_input = nn->layers[i]->out;
     }
 }
@@ -97,19 +96,18 @@ void backpropagation(Network* nn, matrix* Y, float lr,matrix* error, matrix* one
 {
     Layer* last = nn->layers[nn->num_layers - 1];
     u32 batch_size = Y->columns;
-    //allocate space
 
-    //reset gradients
+    //reset gradients and set up space
     for (u32 i = 0; i < nn->num_layers; i++) 
     {
-	
+
         transpose_matrix(nn->layers[i]->W, W_ts[i]);
-	transpose_matrix(nn->layers[i]->in, in_ts[i]);
-	fill_matrix_with_value(nn->layers[i]->dW, 0.0);
+        transpose_matrix(nn->layers[i]->in, in_ts[i]);
+        fill_matrix_with_value(nn->layers[i]->dW, 0.0);
         fill_matrix_with_value(nn->layers[i]->db, 0.0);
     }
 
-    //calculate the derivative of simgoid 
+    //calculate the derivative of simgoid and dz
     transpose_matrix(last->in, t_in);
     substract_matrices(last->out, Y, error);
     fill_matrix_with_value(ones, 1.0);
@@ -124,9 +122,9 @@ void backpropagation(Network* nn, matrix* Y, float lr,matrix* error, matrix* one
     {
         float sum = 0;
         for (u32 j = 0; j < batch_size; j++)
-	{
+        {
             sum += last->dz->data[i * batch_size + j];
-	}
+        }
         last->db->data[i] = sum;
     }
 
@@ -139,7 +137,7 @@ void backpropagation(Network* nn, matrix* Y, float lr,matrix* error, matrix* one
 
         //propagate dz back
         //matrix* W_t = allocate_matrix(next->W->columns, next->W->rows);
-        
+
         multiply_matrices(W_ts[i+1], next->dz, current->dz);
         //free_matrix(W_t);
 
@@ -147,7 +145,7 @@ void backpropagation(Network* nn, matrix* Y, float lr,matrix* error, matrix* one
         Sigmoid_derivative(current);
 
         //matrix* t_in_curr = allocate_matrix(current->in->columns, current->in->rows);
-       
+
         multiply_matrices(current->dz, in_ts[i], current->dW);
         //free_matrix(t_in_curr);
 
@@ -158,7 +156,7 @@ void backpropagation(Network* nn, matrix* Y, float lr,matrix* error, matrix* one
             current->db->data[k] = sum;
         }
     }
-
+    //change the weights
     for (u32 i = 0; i < nn->num_layers; i++) 
     {
         Layer* l = nn->layers[i];
@@ -174,42 +172,38 @@ matrix* predict(Network* nn, matrix* X)
 {
     //make sure the X doesnt get changed 
     matrix* current_input = X;
-    matrix* current_output = NULL;
+    //matrix* current_output = NULL;
 
     //allocate space for z and out for each layer sized to X->columns
-    matrix** temps = malloc(nn->num_layers * 2 * sizeof(matrix*));
+    //matrix** temps = malloc(nn->num_layers * 2 * sizeof(matrix*));
 
     for (int i = 0; i < nn->num_layers; i++) 
     {
-	//allocate memory for the temp z and out
+        //allocate memory for the temp z and out
         Layer* l = nn->layers[i];
         matrix* z_temp   = allocate_matrix(l->num_out, X->columns);
         matrix* out_temp = allocate_matrix(l->num_out, X->columns);
-	//calculate z 
+        //calculate z 
         multiply_matrices(l->W, current_input, z_temp);
         add_bias_to_z(z_temp, l->b);
-	//calculate the sigmoid
+        //calculate the sigmoid
         u32 n = z_temp->rows * z_temp->columns;
         for (u32 j = 0; j < n; j++)
-	{
+        {
             out_temp->data[j] = 1.0f / (1.0f + expf(-z_temp->data[j]));
-	}
-	//free temp
+        }
+        //free temp
         free_matrix(z_temp);
-	//free previous out_temp
-        if (i > 0)
-	{
-		free_matrix(current_input);
-	} 
-	//append to temps and update the current input and output
-        temps[i] = out_temp;
+        //free previous out_temp
+        if (current_input != X)
+        {
+            free_matrix(current_input);
+        } 
+        //append to temps and update the current input and output
         current_input = out_temp;
-        current_output = out_temp;
     }
-    //free memory
-    free(temps);
     //CALLER MUST FREE THIS!!!
-    return current_output;
+    return current_input;
 }
 //-----------------------------Math functions for parts of calculations--------------------------//
 void add_bias_to_z(matrix* z, matrix* b)
@@ -217,9 +211,9 @@ void add_bias_to_z(matrix* z, matrix* b)
     for (u32 i = 0; i < z->columns; i++)
     {
         for (u32 j = 0; j < z->rows; j++)
-	{
+        {
             z->data[j * z->columns + i] += b->data[j];
-	}
+        }
     }
 }
 
@@ -244,7 +238,7 @@ void Sigmoid_activation(Layer* l)
     u32 all = l->z->rows * l->z->columns;
     for (int i = 0; i < all; i++)
     {
-	l->out->data[i] = 1.0f / (1.0f + expf(-l->z->data[i]));
+        l->out->data[i] = 1.0f / (1.0f + expf(-l->z->data[i]));
     }
 }
 
@@ -299,9 +293,9 @@ void He_initialization(Layer* l)
     for (int i = 0; i < l->W->rows; i++)
     {
         for (int j = 0; j < l->W->columns; j++)
-	{
+        {
             l->W->data[i * l->W->columns + j] = (((double)rand() / RAND_MAX) * 2 * limit) - limit;
-	}
+        }
     }
 }
 
@@ -311,9 +305,9 @@ void Xavier_initialization(Layer* l)
     for (int i = 0; i < l->W->rows; i++)
     {
         for (int j = 0; j < l->W->columns; j++)
-	{
+        {
             l->W->data[i * l->W->columns + j] = (((double)rand() / RAND_MAX) * 2 * limit) - limit;
-	}
+        }
     }
 }
 //------------------------------Memory allocation and structure creation--------------------------//
@@ -384,21 +378,21 @@ void print_result(Network* nn, matrix* X_test, matrix* Y_test)
         int predicted = (out->data[i] >= 0.5f) ? 1 : 0;
         int actual    = (int)Y_test->data[i];
         if(predicted == 1 && actual == 1)
-	{
-	    tp++;
-	}
+        {
+            tp++;
+        }
         else if(predicted == 0 && actual == 0)
-	{
-	    tn++;
-	}
+        {
+            tn++;
+        }
         else if(predicted == 1 && actual == 0)
-	{
-	    fp++;
-	}
+        {
+            fp++;
+        }
         else if(predicted == 0 && actual == 1)
-	{
-	    fn++;
-	}
+        {
+            fn++;
+        }
     }
     free_matrix(out);
 
@@ -424,10 +418,10 @@ void print_layer_weights(Layer* l)
     for (int i = 0; i < l->W->rows; i++) 
     {
         for (int j = 0; j < l->W->columns; j++)
-	{
+        {
             printf("%f ", l->W->data[i * l->W->columns + j]);
             printf("\n");
-    	}
+        }
     }
 }
 

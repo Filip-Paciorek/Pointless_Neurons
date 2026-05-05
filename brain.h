@@ -1,3 +1,4 @@
+#pragma once
 #include "nn.h"
 typedef struct {
 	u32 num_in;

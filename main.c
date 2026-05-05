@@ -18,7 +18,7 @@ int main()
     printf("Loading data...\n");
     load_data("pulsary_fixed.csv", X_raw, Y_raw, X_test_raw, Y_test_raw);
     //shuffle the data with an ai function (waiting for maks' implementation)
-    //shuffle_data(X_raw, Y_raw);
+    shuffle_data(X_raw, Y_raw);
     //standardize data
     standardize_z_score(X_raw, X_test_raw);
     //second allocation for shuffled data
@@ -39,9 +39,9 @@ int main()
 
     //Train
     printf("Starting training on Pulsar Dataset...\n");
-    train(nn, X_train, Y_train, 2, 5000,batch_size);
+    train(nn, X_train, Y_train, 2, 1,batch_size);
     //print results (currently ai function until maks's implementation)
-    print_result(nn,X_test,Y_test);
+    evaluate(nn,X_test,Y_test);
     // freeing
     free_matrix(X_raw); free_matrix(Y_raw);
     free_matrix(X_test_raw); free_matrix(Y_test_raw);
