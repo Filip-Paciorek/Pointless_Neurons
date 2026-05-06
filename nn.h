@@ -51,4 +51,5 @@ void copy_matrix(matrix *mat,matrix *copy_matrix);
 u32 oversampled_size(matrix *Train_Y);
 matrix* Oversampling(matrix *Train_x, matrix *Train_y, matrix *New_Y,u32 size );
 void data_profiling(matrix *X, matrix *Y);
+void save_to_csv(char *filename,float *arr,u32 size);
 #endif
