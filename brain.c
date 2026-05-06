@@ -106,29 +106,29 @@ void backpropagation(Network* nn, matrix* Y, float lr,matrix* error, matrix* one
         fill_matrix_with_value(nn->layers[i]->dW, 0.0);
         fill_matrix_with_value(nn->layers[i]->db, 0.0);
     }
-
+  //calculate the first derivatives
     //calculate the derivative of simgoid and dz
-    transpose_matrix(last->in, t_in);
-    substract_matrices(last->out, Y, error);
-    fill_matrix_with_value(ones, 1.0);
-    substract_matrices(ones, last->out, t_out);
-    hadamard_multiply(last->out, t_out, t_out);
-    hadamard_multiply(error, t_out, last->dz);
-    scale_matrix(last->dz, 2.0 / batch_size, last->dz);
+    transpose_matrix(last->in, t_in); //in^T
+    substract_matrices(last->out, Y, error); //out - Y = error
+    fill_matrix_with_value(ones, 1.0); 
+    substract_matrices(ones, last->out, t_out); // 1 - out = t_out
+    hadamard_multiply(last->out, t_out, t_out); // out o (1-out) = t_out
+    hadamard_multiply(error, t_out, last->dz); // (out - Y) o (out o (1-out)) = dz
+    scale_matrix(last->dz, 2.0 / batch_size, last->dz); //dz * (2/batch_size) =dz
 
     //calculate derivatives of dw and db for the last layer
-    multiply_matrices(last->dz, t_in, last->dW);
+    multiply_matrices(last->dz, t_in, last->dW); //dz * in^T = dW
     for (u32 i = 0; i < last->num_out; i++) 
     {
         float sum = 0;
         for (u32 j = 0; j < batch_size; j++)
         {
-            sum += last->dz->data[i * batch_size + j];
+            sum += last->dz->data[i * batch_size + j]; 
         }
-        last->db->data[i] = sum;
+        last->db->data[i] = sum; //dz (sum) = db
     }
 
-
+  //calculate other derivatives
     //hidden layers
     for (i32 i = nn->num_layers - 2; i >= 0; i--) 
     {
@@ -136,19 +136,13 @@ void backpropagation(Network* nn, matrix* Y, float lr,matrix* error, matrix* one
         Layer* next    = nn->layers[i + 1];
 
         //propagate dz back
-        //matrix* W_t = allocate_matrix(next->W->columns, next->W->rows);
-
+      //calculate the new dz by using the chain rule which is in this case the derivative transposed W *dz * sigmoid derivative;
         multiply_matrices(W_ts[i+1], next->dz, current->dz);
-        //free_matrix(W_t);
-
         //multiply by sigmoid'
         Sigmoid_derivative(current);
-
-        //matrix* t_in_curr = allocate_matrix(current->in->columns, current->in->rows);
-
+        //multiply by input transposed to get the current dW
         multiply_matrices(current->dz, in_ts[i], current->dW);
-        //free_matrix(t_in_curr);
-
+        //get the b derivative by summing the current dz since dz*db = dz * (aW + b)' = dz * 1
         for (u32 k = 0; k < current->num_out; k++) {
             float sum = 0;
             for (u32 j = 0; j < batch_size; j++)
@@ -156,7 +150,7 @@ void backpropagation(Network* nn, matrix* Y, float lr,matrix* error, matrix* one
             current->db->data[k] = sum;
         }
     }
-    //change the weights
+    //update the weights
     for (u32 i = 0; i < nn->num_layers; i++) 
     {
         Layer* l = nn->layers[i];

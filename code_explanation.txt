@@ -1,41 +1,47 @@
 ------------------------POINTLESS NEURONS----------------------------
----Autorzy: Filip Paciorek,Maksymilian Buś
+---Autorzy: Filip Paciorek, Maksymilian Buś
 
-1.Ten dokument ma na celu przeprowadzić osoby zainteresowane przez proces myślowy jaki zaszedł podczas podejmowania decyzji dotyczących optymalizacji projektu oraz wytłumaczyć działanie głównych funkcji.
+1. Ten dokument ma na celu przeprowadzić osoby zainteresowane przez proces myślowy, jaki zaszedł podczas podejmowania decyzji dotyczących optymalizacji projektu oraz wytłumaczyć działanie głównych funkcji.
 
-2.Projekt składa się z:
-*3 głównych plików bazowych: 
--brain.c (zawiera główną logikę dotyczącą działania sieci neuronowej),
--body.c (zawiera główną logikę dotyczącą wczytania/wypisania danych oraz normalizacji (normalization) danych w celu polepszenia wyników modelu),
--matrix.c (zawiera główną logikę dotyczącą operacji macierzowych)
-*2 plików nagłówkowych:
--nn.h (zawiera definicje dla funckji i struktur z pliku matrix.c oraz body.c)
--brain.h (zawiera definicje dla funkcji i struktur z pliku brain.c)
-*1 pliku służącego uruchamianiu pliku:
--main.c
+2. Projekt składa się z:
+* 3 głównych plików bazowych: 
+- brain.c (zawiera główną logikę dotyczącą działania sieci neuronowej),
+- body.c (zawiera główną logikę dotyczącą wczytania/wypisania danych oraz normalizacji (normalization) danych w celu polepszenia wyników modelu),
+- matrix.c (zawiera główną logikę dotyczącą operacji macierzowych)
+* 2 plików nagłówkowych:
+- nn.h (zawiera definicje dla funkcji i struktur z pliku matrix.c oraz body.c)
+- brain.h (zawiera definicje dla funkcji i struktur z pliku brain.c)
+* 1 pliku służącego uruchamianiu pliku:
+- main.c
 
-3.Kluczowe struktury danych:
-*matrix:
--definiuje strukture 1D, spłaszczona z 2D używając metodyki row-major jakopróba optymalizacji kodu poprzez wykorzystywanie tego, jak komputer wczytują cache. Posiada wartości rows,columns które definiują jej rozmiar oraz pointer typu float o nazwie data który ma służyć za miejce na alokacje pamięci o tych wymiarach.
-*layer:
--definiuje pojedynczą warstwę sieci neuronowej. Posiada argumenty typu u32num_in oraz num_out które definiują liczbe neuronów wejściowych i wyjściowych z których/do których przekazywane są dane. Głównym elementem są pointery do macierzy W,dw,b,db,z,dz,out które są posiadane przez macierz oraz inktóre jest pożyczane z poprzedniego layera/danych wejściowych.
-*Network:
--definiuje strukturę sieci neuronowej, składa się z zmiennej definiującej liczbe warst sieci, oraz macierzy 2D składającej się z pointerów do warstw.
-4.Zarządzanie pamięcią:
-Ze względu na długość projektu oraz nasze doświadczenie związane z c i sieciami neuronowymi zdecydowaliśmy sie na rozwiązanie niż areny pamięci (memory arenas), stratę na szybkości programu próbowaliśmy zrekompensować strukturą 1D macierzy, oraz ograniczaniem redefiniowania macierzy do minimum (zwłaszcza w funkcji train,co widoczne jest w poprzednich wersjach projektu na git, gdzie macierze były redefiniowane wielokrotnie w funkcji backpropagation lecz zostało to zoptymalizowane).
-5.Implementacja algorytmu:
-5.1 Inizjalizacja dancyh:
--Dane są inicjalizowane metodą Xavier aby zabezpieczyć kod przed szkodliwymi inicjalizacjami danych, stworzona została również metoda inicjalizacji He, ale nie jest wykorzystywana z powodów które zostaną wytłumaczone w następnym punkcie
-5.2 Aktywizacja (Activation functions)neuronów:
--Do aktywizacji neuronów stworzyliśmy funkcje Sigmoid oraz ReLU, lecz funkcja ReLU nie używamy, ponieważ powoduje zbyt wiele martwych neuronów, co szkodzi naszym wynikom, więc używamy jedynie funckji Sigmoid i Xavier (osiągają wspólnie najlepsze wyniki sieci).
+3. Kluczowe struktury danych:
+* matrix:
+- definiuje strukturę 1D, spłaszczoną z 2D używając metodyki row-major jako próba optymalizacji kodu poprzez wykorzystywanie tego, jak komputer wczytuje cache. Posiada wartości rows, columns, które definiują jej rozmiar oraz pointer typu float o nazwie data, który ma służyć za miejsce na alokację pamięci o tych wymiarach.
+* layer:
+- definiuje pojedynczą warstwę sieci neuronowej. Posiada argumenty typu u32 num_in oraz num_out, które definiują liczbę neuronów wejściowych i wyjściowych, z których/do których przekazywane są dane. Głównym elementem są pointery do macierzy W, dW, b, db, z, dz, out, które są posiadane przez macierz oraz in, które jest pożyczane z poprzedniego layera/danych wejściowych.
+* Network:
+- definiuje strukturę sieci neuronowej, składa się z zmiennej definiującej liczbę warstw sieci oraz macierzy 2D składającej się z pointerów do warstw.
+
+4. Zarządzanie pamięcią:
+Ze względu na długość projektu oraz nasze doświadczenie związane z C i sieciami neuronowymi zdecydowaliśmy się na rozwiązanie inne niż areny pamięci (memory arenas). Stratę na szybkości programu próbowaliśmy zrekompensować strukturą 1D macierzy oraz ograniczaniem redefiniowania macierzy do minimum (zwłaszcza w funkcji train, co widoczne jest w poprzednich wersjach projektu na git, gdzie macierze były redefiniowane wielokrotnie w funkcji backpropagation, lecz zostało to zoptymalizowane).
+
+5. Implementacja algorytmu:
+5.1 Inicjalizacja danych:
+- Dane są inicjalizowane metodą Xavier, aby zabezpieczyć kod przed szkodliwymi inicjalizacjami danych. Stworzona została również metoda inicjalizacji He, ale nie jest wykorzystywana z powodów, które zostaną wytłumaczone w następnym punkcie.
+5.2 Aktywizacja (Activation functions) neuronów:
+- Do aktywizacji neuronów stworzyliśmy funkcje Sigmoid oraz ReLU, lecz funkcji ReLU nie używamy, ponieważ powoduje zbyt wiele martwych neuronów, co szkodzi naszym wynikom, więc używamy jedynie funkcji Sigmoid i Xavier (osiągają wspólnie najlepsze wyniki sieci).
 5.3 Trening sieci:
--Do treningu sieci używana jest metod Mini-Batch Stochastic Gradient Descent, w wcześniejszych wersjach projektu testowana była metoda Stochastic Gradient Descent, lecz powodowała overlearning, więc zdecydowaliśmy się na ten wariant, który znacznie poprawił wyniki modelu, do tego celu używana jest funkcja slice_matrix_columns, która tworzy mniejsze batche w wyznaczonym rozmiarze.
-Co do działania Mini-Batch Stochastic Gradient Descent, polega on na iteracji danej ilości epok (każda składa się z całego datasetu), dla których kod przechodzi przez pętlę dla każdego batcha. W składd tej pętli wchodzą funkcje:
-*Feedforward:
--Służy do przeprowadzenia pierwszej iteracji(dla danej epoki) przez sieć neuronową. Przechodzi przez każdą warstwę neuronową i oblicza dla niej współczynniki "z" (składające się z waga*wartość dla danego neuronu oraz biasów), które następnie są aktywowane i zapisywane jako output obecnego layera i input następnego layera.
-*Backpropagation:
-Główna część kodu odpowiadająca za "uczenie się", liczy pochodne dla każdej wagi i biasu. Osiągane jest to poprzez wyliczenie pochodnej współczynnika "z" używając mnożenia hadamarda (każdy element razy każdy element a nie klasyczne mnożenie macierzy). Ten błąd (dz) dla ostatniej warstwy liczymy jako iloczyn różnicy (output - Y) oraz pochodnej funkcji sigmoid, czyli (out * (1 - out)). Ten błąd jest wtedy propagowany wstecz do poprzednich warstw. Aby to zrobić, mnożymy transponowaną macierz wag warstwy następnej przez jej błąd dz i ponownie nakładamy pochodną sigmoidu obecnej warstwy. Pozwala to wyliczyć gradienty dW (dz pomnożone przez transponowany input) oraz db (suma dz po kolumnach batcha). Na samym końcu następuje aktualizacja parametrów: od wag (W) i biasów (b) odejmujemy ich gradienty pomnożone przez learning rate, co realizuje algorytm Gradient Descent i minimalizuje błąd MSE.
-6.Testowanie modelu:
--Po tym jak nasz model się nauczy, używamy funkcji predict, która wykonuje proces feedforward dla nowych danych, których sieć nie widziała w fazie treningu. Funkcja ta zwraca finalną macierz z wynikami, które interpretujemy jako prawdopodobieństwo przynależności do danej klasy. 
+- Do treningu sieci używana jest metoda Mini-Batch Stochastic Gradient Descent. We wcześniejszych wersjach projektu testowana była metoda Stochastic Gradient Descent, lecz powodowała overlearning, więc zdecydowaliśmy się na ten wariant, który znacznie poprawił wyniki modelu. Do tego celu używana jest funkcja slice_matrix_columns, która tworzy mniejsze batche w wyznaczonym rozmiarze.
+Co do działania Mini-Batch Stochastic Gradient Descent, polega on na iteracji danej ilości epok (każda składa się z całego datasetu), dla których kod przechodzi przez pętlę dla każdego batcha. W skład tej pętli wchodzą funkcje:
+* Feedforward:
+- Służy do przeprowadzenia pierwszej iteracji (dla danej epoki) przez sieć neuronową. Przechodzi przez każdą warstwę neuronową i oblicza dla niej współczynniki "z" (składające się z waga * wartość dla danego neuronu oraz biasów), które następnie są aktywowane i zapisywane jako output obecnego layera i input następnego layera.
+* Backpropagation:
+Główna część kodu odpowiadająca za "uczenie się", liczy pochodne dla każdej wagi i biasu. Osiągane jest to poprzez wyliczenie pochodnej współczynnika "z" używając mnożenia Hadamarda (każdy element razy każdy element, a nie klasyczne mnożenie macierzy). Ten błąd (dz) dla ostatniej warstwy liczymy jako iloczyn różnicy (output - Y) oraz pochodnej funkcji Sigmoid, czyli (out * (1 - out)). Ten błąd jest wtedy propagowany wstecz do poprzednich warstw. Aby to zrobić, mnożymy transponowaną macierz wag warstwy następnej przez jej błąd dz i ponownie nakładamy pochodną Sigmoidu obecnej warstwy. Pozwala to wyliczyć gradienty dW (dz pomnożone przez transponowany input) oraz db (suma dz po kolumnach batcha). Na samym końcu następuje aktualizacja parametrów: od wag (W) i biasów (b) odejmujemy ich gradienty pomnożone przez learning rate, co realizuje algorytm Gradient Descent i minimalizuje błąd MSE. 
+Podsumowując algorytm backpropagation:
+1. Wyliczamy hadamard((out - Y), hadamard(out, 1-out)), co daje nam pochodną "z".
+2. Propagujemy błąd wstecz, co znaczy, że używając metody łańcuchowej mnożymy pochodną "z" przez pochodną "z" obecnego względem wartości in, co daje nam pochodną "z" (starego) * W^T (nazwijmy to ddz).
+3. Obliczamy gradienty (dalej metodą łańcuchową): pochodna dla W to in^T, więc dW to in^T * ddz; dla b sama pochodna to po prostu 1 (macierz), więc mamy ddz * 1.
+4. Aktualizujemy nasze W i b poprzez odjęcie od nich naszych pochodnych po wcześniejszym przemnożeniu tych pochodnych przez wybrany learning rate.
 
-
+6. Testowanie modelu:
+- Po tym jak nasz model się nauczy, używamy funkcji predict, która wykonuje proces feedforward dla nowych danych, których sieć nie widziała w fazie treningu. Funkcja ta zwraca finalną macierz z wynikami, które interpretujemy jako prawdopodobieństwo przynależności do danej klasy.
