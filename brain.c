@@ -7,7 +7,7 @@
 
 //-----------------------------Main four steps of the network--------------------------//
 
-void train(Network* nn, matrix* X, matrix* Y, float lr, u32 epochs, u32 batch_size)
+void train(Network* nn, matrix* X, matrix* Y, float lr, u32 epochs, u32 batch_size,float *loss_history)
 {
     /*Perform the full forward-backward loop on each batch*/
     //initialize the network
@@ -43,10 +43,11 @@ void train(Network* nn, matrix* X, matrix* Y, float lr, u32 epochs, u32 batch_si
             backpropagation(nn, Y_batch, lr,error,ones,t_out,t_in,W_ts,in_ts);
         }
         //print loss for each 1000 epochs
+        loss_history[e] = MSE(Y_batch,nn->layers[nn->num_layers-1]);//adding loss data needed to plot
         if (e % 1000 == 0)
-        {
-            printf("epoch %d loss: %f\n", e, MSE(Y_batch, nn->layers[nn->num_layers-1]));
-        }
+	{
+            printf("epoch %d loss: %f\n", e,loss_history[e]);
+	}
     }
     //free memory
 
