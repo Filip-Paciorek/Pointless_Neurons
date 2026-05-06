@@ -73,17 +73,17 @@ void standardize_z_score(matrix *mat,matrix *mat_test){
 
     for (u32 i = 0; i < INPUT_COLS; i++){
     double sum = 0.0;
-        for (u32 j = 0; j < TRAIN_SIZE; j++){
+        for (u32 j = 0; j < mat->rows; j++){
             sum+=mat->data[((j*INPUT_COLS))+i];
         }
-    double mean = sum / TRAIN_SIZE;
+    double mean = sum / mat->rows;
     double variation = 0.0;
-        for (u32 k = 0; k < TRAIN_SIZE; k++){
+        for (u32 k = 0; k < mat->rows; k++){
             variation+=pow((mat->data[((k*INPUT_COLS))+i]-mean),2);
         }
-    double deviation = sqrt(variation / TRAIN_SIZE);
+    double deviation = sqrt(variation / mat->rows);
     if (deviation>0.0000001){
-        for (u32 l = 0; l < TRAIN_SIZE; l++)
+        for (u32 l = 0; l < mat->rows; l++)
     {
         mat->data[(l*INPUT_COLS)+i] = (mat->data[((l*INPUT_COLS))+i]-mean)/deviation;
     }
@@ -99,13 +99,13 @@ void normalize_min_max(matrix *mat,matrix *mat_test){
     for (u32 i = 0; i < INPUT_COLS; i++){
         double max = mat->data[i];
         double min = mat->data[i];
-        for (u32 j = 1; j < TRAIN_SIZE; j++){
+        for (u32 j = 1; j < mat->rows; j++){
             if (mat->data[(j*INPUT_COLS)+i]>max) max = mat->data[(j*INPUT_COLS)+i];
             if (mat->data[(j*INPUT_COLS)+i]<min) min = mat->data[(j*INPUT_COLS)+i];
         }
         double diff = max - min;
         if (diff >0.0000001){
-            for (u32 l = 0; l < TRAIN_SIZE; l++)
+            for (u32 l = 0; l < mat->rows; l++)
             {
                 mat->data[(INPUT_COLS*l)+i] = (mat->data[(INPUT_COLS*l)+i]-min)/diff;
             }
