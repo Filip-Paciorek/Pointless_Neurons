@@ -362,50 +362,6 @@ void free_layer(Layer* l)
     free(l);
 }
 //------------------------------Result printing and debug printing--------------------------//
-void print_result(Network* nn, matrix* X_test, matrix* Y_test)
-{
-    /*function written by ai to test out results (waiting for maks's implementation)*/
-    matrix* out = predict(nn, X_test);
-
-    int tp = 0, tn = 0, fp = 0, fn = 0;
-    for (u32 i = 0; i < X_test->columns; i++) 
-    {
-        int predicted = (out->data[i] >= 0.5f) ? 1 : 0;
-        int actual    = (int)Y_test->data[i];
-        if(predicted == 1 && actual == 1)
-        {
-            tp++;
-        }
-        else if(predicted == 0 && actual == 0)
-        {
-            tn++;
-        }
-        else if(predicted == 1 && actual == 0)
-        {
-            fp++;
-        }
-        else if(predicted == 0 && actual == 1)
-        {
-            fn++;
-        }
-    }
-    free_matrix(out);
-
-    float precision = (float)tp / (tp + fp + 1e-7f);
-    float recall    = (float)tp / (tp + fn + 1e-7f);
-    float f1        = 2.0f * precision * recall / (precision + recall + 1e-7f);
-
-    printf("\n--- Confusion Matrix ---\n");
-    printf("Actual \\ Pred |  Pulsar (1)  |   Noise (0)  |\n");
-    printf("--------------|--------------|--------------|\n");
-    printf("Pulsar (1)    | %12d | %12d | (Recall: %.2f%%)\n", tp, fn, recall*100);
-    printf("Noise  (0)    | %12d | %12d | (Spec:   %.2f%%)\n", fp, tn, (float)tn/(tn+fp+1e-7f)*100);
-    printf("\n--- Metrics ---\n");
-    printf("Accuracy:  %.2f%%\n", (float)(tp+tn) / X_test->columns * 100);
-    printf("Precision: %.2f%%\n", precision*100);
-    printf("Recall:    %.2f%%\n", recall*100);
-    printf("F1-Score:  %.4f\n",   f1);
-}
 
 void print_layer_weights(Layer* l)
 {
