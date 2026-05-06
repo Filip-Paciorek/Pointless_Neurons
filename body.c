@@ -117,9 +117,26 @@ void normalize_min_max(matrix *mat,matrix *mat_test){
 
     }
 }
+void save_to_csv(char *filename,float *arr,u32 size){
+    FILE *fptr = File_open(filename,"w");
+    for (u32 i = 0; i < size; i++)
+    {
+        fprintf(fptr,"%.4f\n",arr[i]);
+    }
+    file_close(fptr);
+    
+}
 void save_matrix_to_csv(char *filename , matrix *mat){
     FILE *fptr = File_open(filename,"w");
-    for (u32 i = 0; i < mat->rows; i++)
+    if (mat->rows == 1 ){
+        for ( u32 r = 0; r < mat->columns; r++)
+        {
+            fprintf(fptr,"%.4f\n",mat->data[r]);
+        }
+    }
+    else{
+
+        for (u32 i = 0; i < mat->rows; i++)
     {
         fprintf(fptr,"%.4f",mat->data[(i*mat->columns)+0]);
         for (u32 j = 1; j < mat->columns; j++)
@@ -129,8 +146,8 @@ void save_matrix_to_csv(char *filename , matrix *mat){
         fprintf(fptr,"\n");
         
     }
+    }
     file_close(fptr);
-    
 }
 void shuffle_data(matrix * X,matrix *Y){
     float tmp_X, tmp_Y;
@@ -235,6 +252,7 @@ matrix* Oversampling(matrix *Train_x, matrix *Train_y, matrix *New_Y,u32 size ){
             current_row+=1; 
         }
     }
+
     return New_X;
 }
 void data_profiling(matrix *X, matrix *Y){
@@ -262,8 +280,6 @@ void data_profiling(matrix *X, matrix *Y){
         min_tab[i] = min;
         max_tab[i] = max;
         mean_tab[i] = mean;
-
-
     }
     printf("\n================ DATASET PROFILING ================\n");
     for (u32 k = 0; k < X->columns; k+=2)
