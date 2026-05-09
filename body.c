@@ -24,7 +24,8 @@ FILE * File_open(char *file_name,char *action){
 void file_close(FILE *fptr){
     fclose(fptr);
 }
-void load_data(char *filename,matrix *X,matrix *Y,matrix* X_t,matrix* Y_t){
+void load_data(char *filename,matrix *X,matrix *Y,matrix* X_t,matrix* Y_t){//function to load parse data from csv into matrix
+    //open the dataset file in read mode 
     FILE *fptr = File_open(filename,"r");
     char line[1024];
     u32 row_index = 0;
@@ -33,15 +34,19 @@ void load_data(char *filename,matrix *X,matrix *Y,matrix* X_t,matrix* Y_t){
         printf("ERROR");
         return;
     }
-
+    //reading file line by line
     while (fgets(line,sizeof(line),fptr)!=NULL){
          
+        //sending through below conditions to parse function present line
+        //allocated matrices and current row index to checked whether is Train data or test
         if (row_index < TRAIN_SIZE)
         {
+            //filling training matrices with (X,Y)
             parse_csv_line(line,X,Y,row_index);
 
         }
         else{
+            //filling test matrices with (X_t,Y_t)
             parse_csv_line(line,X_t,Y_t,row_index-TRAIN_SIZE);
         }
         row_index += 1;}
