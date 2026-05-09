@@ -47,23 +47,25 @@ void load_data(char *filename,matrix *X,matrix *Y,matrix* X_t,matrix* Y_t){
         row_index += 1;}
     file_close(fptr);
 }
-void parse_csv_line(char *line, matrix *X, matrix *Y, u32 row_index){
-    const char s[4]=",";
+void parse_csv_line(char *line, matrix *X, matrix *Y, u32 row_index){//function which "cuts" values in lines(from csv) separated , and convert them from string to float value
+    const char s[4]=",";//seting char which will will be activator for strtok function to cut values
     char *tok;
-    tok = strtok(line,s);
+    tok = strtok(line,s);// setting token to first line in csv file 
     u32 col_index = 0;
     while (tok!=NULL)
     {   
-        double val = atof(tok);
+        double val = atof(tok);//atof convert string values into double
         if (col_index<INPUT_COLS)
         {
+            //storing feature of stars in matrix X
             X->data[((row_index*INPUT_COLS)+col_index)] = val;
         }
         else if (col_index==INPUT_COLS)
-        {
+        {   
+            //storing final prediction it if star or not(1 or 0)
             Y->data[(row_index*Y->columns)] = val;
         }
-        tok = strtok(NULL,s);
+        tok = strtok(NULL,s);//moving to second value in same line
         col_index+=1;
         
     }
