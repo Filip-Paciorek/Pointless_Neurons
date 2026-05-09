@@ -147,24 +147,26 @@ void save_to_csv(char *filename,float *arr,u32 size){//saving array into csv nee
     file_close(fptr);
     
 }
-void save_matrix_to_csv(char *filename , matrix *mat){
+void save_matrix_to_csv(char *filename , matrix *mat){//saving array into csv needed to make plots in python
+    //openig file in write mode
     FILE *fptr = File_open(filename,"w");
-    if (mat->rows == 1 ){
+    if (mat->rows == 1 ){//condition to save into csv matrices with 1 row with  many columns
         for ( u32 r = 0; r < mat->columns; r++)
         {
-            fprintf(fptr,"%.4f\n",mat->data[r]);
+            //writing as a vertical column for easier plot processing in python
+            fprintf(fptr,"%.4f\n",mat->data[r]);//writing the number with only 4 decimal places 
         }
     }
     else{
 
         for (u32 i = 0; i < mat->rows; i++)
     {
-        fprintf(fptr,"%.4f",mat->data[(i*mat->columns)+0]);
+        fprintf(fptr,"%.4f",mat->data[(i*mat->columns)]);
         for (u32 j = 1; j < mat->columns; j++)
         {
-            fprintf(fptr,",%.4f",mat->data[(i*mat->columns)+j]);
+            fprintf(fptr,",%.4f",mat->data[(i*mat->columns)+j]);//writing reamaing elements separated by ,
         }
-        fprintf(fptr,"\n");
+        fprintf(fptr,"\n");//moving to next line after finishing full row
         
     }
     }
