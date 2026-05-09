@@ -138,11 +138,11 @@ void normalize_min_max(matrix *mat,matrix *mat_test){
 
     }
 }
-void save_to_csv(char *filename,float *arr,u32 size){
+void save_to_csv(char *filename,float *arr,u32 size){//saving array into csv needed to make plots in python
     FILE *fptr = File_open(filename,"w");
     for (u32 i = 0; i < size; i++)
     {
-        fprintf(fptr,"%.4f\n",arr[i]);
+        fprintf(fptr,"%.4f\n",arr[i]);//saving only numbers with with 4 decimal places
     }
     file_close(fptr);
     
