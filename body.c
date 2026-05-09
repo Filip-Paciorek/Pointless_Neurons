@@ -197,20 +197,28 @@ void shuffle_data(matrix * X,matrix *Y){
     }
 
 }
-void evaluate(Network *nn, matrix *test_X, matrix *test_Y){
+void evaluate(Network *nn, matrix *test_X, matrix *test_Y,float threshold){
+    // functiuon to evaluate model performance 
+    // TP: True Positives, TN: True Negatives, FP: False Positives, FN: False Negatives
     u32 TP=0,TN=0,FP=0,FN=0;
     float brier_sum = 0.0f;
     
+    // filing matrix with predicted values for the test set
     matrix *pred_val = predict(nn,test_X);
     for (u32 i = 0; i < test_X->columns; i++)
     {
-        if (pred_val->data[i]>=0.5 && test_Y->data[i]==1) TP+=1;
-        if (pred_val->data[i]<0.5 && test_Y->data[i]!=1) TN+=1;
-        if (pred_val->data[i]>=0.5 && test_Y->data[i]!=1) FP+=1;
-        if (pred_val->data[i]<0.5 && test_Y->data[i]==1) FN+=1;
+        // classifications uing the probability threshold to checked if it's pulsar or not and increment appropriate values
+        if (pred_val->data[i]>=threshold && test_Y->data[i]==1) TP+=1;
+        if (pred_val->data[i]<threshold && test_Y->data[i]!=1) TN+=1;
+        if (pred_val->data[i]>=threshold && test_Y->data[i]!=1) FP+=1;
+        if (pred_val->data[i]<threshold && test_Y->data[i]==1) FN+=1;
+        
+        //Calculating the squared error for each prediction and adding  it to the sum for Brier Score
         brier_sum+=(pred_val->data[i]-test_Y->data[i])*(pred_val->data[i]-test_Y->data[i]);
     }
         free_matrix(pred_val); 
+
+    //Metrics calculation    
     float  Accuracy = (float)(TP + TN) / (float)(TP + TN + FP +FN); 
     float Precision = 0.0f;
     float Recall = 0.0f;
@@ -225,11 +233,17 @@ void evaluate(Network *nn, matrix *test_X, matrix *test_Y){
     
     if (Precision + Recall > 0.0f) F1 = 2*(Precision*Recall)/(Precision+Recall);
     
-
+    // MCC (Matthew’s Correlation Coefficient) used to checked if model is guesign or actualy thinking.
+    // MCC: Robust metric for imbalanced data, prevents bias towards majority class
+    // 1e-7f is added to the denominator to prevent division by zero errors
+    // It considers all 4 Confusion Matrix fields (TP, TN, FP, FN). 
     MCC = ((double)(TP*TN)-(double)(FP*FN))/(sqrt((double)(TP+FP)*(double)(TP+FN)*(double)(TN+FP)*(double)(TN+FN))+1e-7f);
     printf("\n--- Confusion Matrix ---\n");
     printf("Actual \\ Pred |  Pulsar (1)  |   Noise (0)  |\n");
     printf("--------------|--------------|--------------|\n");
+    // Colors (\033[0;32m) and (\033[0;31m)  are used to highlight Correct (Green) and Errors (Red)
+    // Green(correct) Red(Mistake)
+    // printing confusion matrix
     printf("Pulsar (1)    | \033[0;32m%12u\033[0m | \033[0;31m%12u\033[0m | (Recall: %.2f%%)\n", TP, FN, Recall*100);
     printf("Noise  (0)    | \033[0;31m%12u\033[0m | \033[0;32m%12u\033[0m | (Spec:   %.2f%%)\n", FP, TN, (float)TN/(TN+FP+1e-7f)*100);
     printf("\n--- Metrics ---\n");
@@ -242,6 +256,10 @@ void evaluate(Network *nn, matrix *test_X, matrix *test_Y){
 
 }
 void copy_matrix(matrix *mat,matrix *copy_matrix){
+    // function needed to separate date to min_max and z_score
+
+    // condiiton checking if matrix where copied data will go is big enough to collet all copied data
+    // beacuse it's copying samller matrix to bigger 
     if ((mat->rows*mat->columns)> (copy_matrix->rows*copy_matrix->columns) || mat->columns != copy_matrix->columns)
     {
         printf("Error, wrong copy_matrix allocation");
@@ -250,51 +268,71 @@ void copy_matrix(matrix *mat,matrix *copy_matrix){
     else{
         for (u32 i = 0; i < (mat->rows)*mat->columns; i++)
     {
-        copy_matrix->data[i] = mat->data[i] ;
+        //fast copying all data 
+        copy_matrix->data[i] = mat->data[i];
     }
     
     }
     
 }
 u32 oversampled_size(matrix *Train_Y){
+    // function needed to set the correct size for the new oversampled matrix
     u32 noise_count = 0;
     for (u32 i = 0; i < Train_Y->rows; i++)
     {
+        // checking how many noises are in sent Matrix and counting them
         if (Train_Y->data[i] == 0) noise_count+=1;
     }
+    //returning 2x noise_count because the oversampled matrix will contain 
+    // an equal number of noise samples and oversampled pulsar samples.
     return noise_count * 2;
 
 }
-matrix* Oversampling(matrix *Train_x, matrix *Train_y, matrix *New_Y,u32 size ){
+matrix* Oversampling(matrix *Train_x, matrix *Train_y, matrix *New_Y, u32 size) {
+    // Oversampling matrices to increase model performance on imbalanced data
     u32 current_row = Train_y->rows;
-    matrix *New_X = allocate_matrix(size,Train_x->columns);
-    copy_matrix(Train_x,New_X);
-    copy_matrix(Train_y,New_Y);
+
+    // Allocating new matrix to store original data and additional pulsar rows 
+    // with bigger size set by oversampled_size function
+    matrix *New_X = allocate_matrix(size, Train_x->columns);
+
+    // Copying original training data into the new, larger one's
+    copy_matrix(Train_x, New_X);
+    copy_matrix(Train_y, New_Y);
+
     while (current_row < size)
     {
+        // Picking a random index from the original dataset
         u32 val = rand() % Train_y->rows;
-        if (Train_y->data[val] == 1){
+
+        // If the selected row contains a pulsar, duplicate it and added to matrix
+        if (Train_y->data[val] == 1) {
             New_Y->data[current_row] = 1;
             for (u32 j = 0; j < Train_x->columns; j++)
             {
-                New_X->data[(current_row*Train_x->columns)+j] = Train_x->data[(val*Train_x->columns)+j];
+                New_X->data[(current_row * Train_x->columns) + j] = Train_x->data[(val * Train_x->columns) + j];
             }
-            current_row+=1; 
+            current_row += 1; 
         }
     }
 
     return New_X;
 }
 void data_profiling(matrix *X, matrix *Y){
+    // function used to analyze dataset before scaling and training
     u32 pulsars_counter = 0;
     u32 noise_counters = 0;
+    // fixed arrays to collect below features for each column
     double max_tab[8];
     double min_tab[8];
     double mean_tab[8];
+
+    //counting how many pulsars and noises are in dataset
     for ( u32 i = 0; i < Y->rows; i++)
     {
         (Y->data[i] == 1) ? pulsars_counter++ : noise_counters ++; 
     }
+    //calculating min max mean for each column 
     for (u32 i = 0; i < X->columns; i++)
     {
         double max = X->data[i];
@@ -311,23 +349,23 @@ void data_profiling(matrix *X, matrix *Y){
         max_tab[i] = max;
         mean_tab[i] = mean;
     }
-    printf("\n================ DATASET PROFILING ================\n");
+
+    printf("------------------------------------DATASET PROFILING--------------------------------------\n");
     for (u32 k = 0; k < X->columns; k+=2)
-    {
+    {   
+        //printing results for each column in dual column table to achieved better displaying in terminal
         printf(" COL |    MIN     |    MAX     |    MEAN    || COL |    MIN     |    MAX     |    MEAN    \n");
         printf("--------------------------------------------||--------------------------------------------\n");
         printf(" [%u] |%10.4f |%10.4f |%13.4f || [%u] |%10.4f |%10.4f |%10.4f\n", k+1, min_tab[k], max_tab[k], mean_tab[k], 
         k+2, min_tab[k+1], max_tab[k+1], mean_tab[k+1]);        
         printf("--------------------------------------------||---------------------------------------------\n");
     }
+        // printing final summary of dataset
         printf("Total Samples:  %u\n", Y->rows);
         printf("Pulsars (1):    %u (%.2f%%)\n", pulsars_counter, (float)pulsars_counter / Y->rows * 100.0f);
         printf("Noise (0):      %u (%.2f%%)\n", noise_counters, (float)noise_counters / Y->rows * 100.0f);
     
 }
-
-
-
 
 
 
