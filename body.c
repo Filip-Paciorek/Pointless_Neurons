@@ -76,26 +76,33 @@ void parse_csv_line(char *line, matrix *X, matrix *Y, u32 row_index){//function 
     }
 }
 
-void standardize_z_score(matrix *mat,matrix *mat_test){
-
+void standardize_z_score(matrix *mat,matrix *mat_test){//stndardize (Z_score) transfrming data to mean 0 an standard deviation 1
     for (u32 i = 0; i < INPUT_COLS; i++){
     double sum = 0.0;
         for (u32 j = 0; j < mat->rows; j++){
             sum+=mat->data[((j*INPUT_COLS))+i];
         }
+    // seting mean sum from above loop and mat->rows which represt numbers of all rows in matrix
     double mean = sum / mat->rows;
-    double variation = 0.0;
+    double sum_sq_diff = 0.0;
         for (u32 k = 0; k < mat->rows; k++){
-            variation+=pow((mat->data[((k*INPUT_COLS))+i]-mean),2);
+            // Sum of squared differences from the mean
+            sum_sq_diff+=pow((mat->data[((k*INPUT_COLS))+i]-mean),2);
         }
-    double deviation = sqrt(variation / mat->rows);
+    double deviation = sqrt(sum_sq_diff / mat->rows);
+    //calculating mean sum_sq_diff and deviation(above process) from Train data only
+    
+    //condtion to prevent divison by 0
     if (deviation>0.0000001){
         for (u32 l = 0; l < mat->rows; l++)
     {
+        //applaying Z_score for Training dataset
         mat->data[(l*INPUT_COLS)+i] = (mat->data[((l*INPUT_COLS))+i]-mean)/deviation;
     }
         for (u32 m = 0;m < TEST_SIZE; m++)
-    {   
+    {       
+            //applaying Z_score for Test data set with same mean and deviation like Traning
+            // This ensures the test set is scaled exactly like the model's training environment
             mat_test->data[(INPUT_COLS*m)+i] = (mat_test->data[(INPUT_COLS*m)+i]-mean)/deviation;
     }
     }
