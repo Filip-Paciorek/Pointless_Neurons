@@ -173,17 +173,24 @@ void save_matrix_to_csv(char *filename , matrix *mat){//saving array into csv ne
     file_close(fptr);
 }
 void shuffle_data(matrix * X,matrix *Y){
-    float tmp_X, tmp_Y;
-    for (u32 i= X->rows - 1 ;i > 0; i--)
+    //Using Fisher-Yates shuffle algorithm to randomize the order of training samples
+    //shufling is done simultaneously to keep features and labels synchrnized
+
+    double tmp_X, tmp_Y;// Using double to maintain full data precision
+
+    for (u32 i= X->rows - 1 ;i > 0; i--)//loop is set to go backwards according Fisher-Yates algorithm
     {
+        //picking random index from 0 to i
         u32 j = rand() % (i+1);
         
         for (u32 k = 0; k < X->columns; k++)
         {
+            //swapping entire rows in matrix X
             tmp_X = X->data[(i*X->columns)+k];
             X->data[(i*X->columns)+k] = X->data[(j*X->columns)+k]; 
             X->data[(j*X->columns)+k] = tmp_X;
         }
+        //swapping correspodning labels in matrix Y
         tmp_Y = Y->data[i];
         Y->data[i] = Y->data[j];
         Y->data[j] = tmp_Y;  
