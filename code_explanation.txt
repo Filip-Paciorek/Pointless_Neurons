@@ -45,3 +45,32 @@ Podsumowując algorytm backpropagation:
 
 6. Testowanie modelu:
 - Po tym jak nasz model się nauczy, używamy funkcji predict, która wykonuje proces feedforward dla nowych danych, których sieć nie widziała w fazie treningu. Funkcja ta zwraca finalną macierz z wynikami, które interpretujemy jako prawdopodobieństwo przynależności do danej klasy.
+7.1 Ładowanie danych (load_data i parse_csv_line):
+Funkcja parsująca tnie pliki CSV po przecinkach (używając strtok) i zamienia tekst na wartości zmiennoprzecinkowe (double).
+Wrzucamy to do naszych spłaszczonych macierzy 1D. Funkcja pilnuje podziału na zestaw treningowy (TRAIN_SIZE) i testowy (TEST_SIZE).
+7.2 Balansowanie danych (Oversampling i data_profiling):
+Z profilowania danych (funkcja data_profiling) wyszło nam, że pulsarów jest ułamek procenta w porównaniu do zwykłego szumu kosmicznego. Gdybyśmy wrzucili to do sieci tak jak jest, model po prostu nauczyłby się zgadywać, że wszystko to szum i miałby 98% skuteczności, będąc kompletnie bezużytecznym.
+Funkcja Oversampling rozwiązuje ten problem. Zlicza ona ilość szumu i kopiuje wiersze z pulsarami tak długo, aż zrównają się z szumem. Dzięki temu model na etapie treningu ma wyrównane szanse na naukę obu klas.
+Na koniec używamy shuffle_data (algorytm Fisher-Yates), żeby przetasować wiersze by sieć nie uczyła się ich na pamięć w konkretnej kolejności.
+7.3 Normalizacja i Skalowanie:
+Kolumny w naszych danych miały bardzo różne zakresy (jedne od 0 do 1, inne leciały w tysiące). Sieć neuronowa tego nie lubi, bo duże liczby zagłuszają te małe w trakcie liczenia gradientów.
+Zaimplementowaliśmy dwa podejścia, żeby sprawdzić, co zadziała lepiej:
+a) normalize_min_max - ściska wszystkie wartości do bezpiecznego przedziału (0, 1).
+b) standardize_z_score - centruje dane wokół zera z odchyleniem standardowym równym 1.
+Współczynniki do skalowania liczymy ZAWSZE tylko na danych treningowych, a potem z tymi samymi współczynnikami skalujemy dane testowe, żeby nie było wycieku informacji z przyszłości.
+Ocena modelu i wyciąganie wniosków (main.c i funkcje ewaluacyjne)
+Samo uczenie to za mało, musieliśmy jakoś obiektywnie ocenić, czy model faktycznie działa, i wyciągnąć z niego dane do wizualizacji.
+8.1 Funkcja evaluate:
+Przechodzi przez dane testowe i przyrównuje wyniki z funkcji predict do prawdziwych etykiet.
+Używamy progu (threshold) ustawionego na 0.7. Jeśli sieć wypluje wartość > 0.7, uznajemy to za pulsara.
+Zlicza pomyłki i sukcesy: True Positives (TP), True Negatives (TN), False Positives (FP) i False Negatives (FN).
+Liczy kluczowe metryki:
+Recall (Czułość): bo zależy nam, żeby nie przegapić prawdziwego pulsara.
+Precision (Precyzja): bo nie chcemy mieć za dużo fałszywych alarmów.
+F1-Score i Brier Score: oceniają ogólną jakość predykcji.
+MCC (Matthew’s Correlation Coefficient): najważniejsza metryka przy naszych niezbalansowanych danych. Mówi wprost, czy model faktycznie myśli, czy tylko  zgaduje (0 to losowość, 1 to perfekcja).
+8.2 Most między C a Pythonem (Eksport danych):
+Ponieważ rysowanie ładnych wykresów w czystym C jest cięzkie, zdecydowaliśmy się wyeksportować surowe wyniki.
+Zmodyfikowaliśmy pętlę treningową w brain.c, by zapisywała błąd MSE z każdej epoki do tablicy.
+Używając funkcji save_matrix_to_csv oraz save_to_csv wyrzucamy nasze wczytane i przemielone macierze do zwykłych plików .csv (np. loss_minmax.csv, y_pred_zscore.csv, y_true.csv).
+Dzięki temu dedykowany skrypt w Pythonie może wziąć te pliki i wygenerować profesjonalne wizualizacje (Krzywe uczenia, Macierze pomyłek, Krzywe ROC i Precision-Recall), co ułatwia ostateczny wybór metody skalowania (gdzie z wykresów bezdyskusyjnie wygrywa Min-Max).
