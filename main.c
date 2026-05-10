@@ -1,5 +1,3 @@
-#include "brain.c"
-#include "body.c"
 #include <stdio.h>
 #include <stdlib.h>
 #include <time.h>
