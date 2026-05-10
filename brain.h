@@ -50,4 +50,4 @@ void feedforward(Network* nn,matrix* X);
 matrix* predict(Network* nn, matrix* X);
 void load_input(Network* nn, matrix* X);
 void print_result(Network* nn, matrix* X_test, matrix* Y_test);
-void evaluate(Network *nn, matrix *test_X, matrix *test_Y);
+void evaluate(Network *nn, matrix *test_X, matrix *test_Y,float threshold);
