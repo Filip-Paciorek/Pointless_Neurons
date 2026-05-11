@@ -18,8 +18,6 @@ void train(Network* nn, matrix* X, matrix* Y, float lr, u32 epochs, u32 batch_si
     matrix* X_batch = allocate_matrix(X->rows, batch_size);
     matrix* Y_batch = allocate_matrix(Y->rows, batch_size);
     //for each epoch iterate over all the batches
-
-    
     matrix* error = allocate_matrix(Y->rows, batch_size);
     matrix* ones  = allocate_matrix(Y->rows, batch_size);
     matrix* t_out = allocate_matrix(Y->rows, batch_size);
@@ -45,7 +43,7 @@ void train(Network* nn, matrix* X, matrix* Y, float lr, u32 epochs, u32 batch_si
             backpropagation(nn, Y_batch, lr,error,ones,t_out,t_in,W_ts,in_ts);
         }
 	//print loss for each 1000 epochs
-    loss_history[e] = MSE(Y_batch,nn->layers[nn->num_layers-1]);
+    loss_history[e] = MSE(Y_batch,nn->layers[nn->num_layers-1]);//adding loss data needed to plot
         if (e % 1000 == 0)
 	{
             printf("epoch %d loss: %f\n", e,loss_history[e]);
