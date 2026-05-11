@@ -133,6 +133,25 @@ int main()
     save_matrix_to_csv("y_pred_minmax.csv", final_preds_minmax);
     free_matrix(final_preds_minmax);
 
+    //Plots call section
+    printf("\n==========================================\n");
+    printf("If you want generate plots choose Y/N: ");
+    printf("\n==========================================\n");
+    char choice = ' ';
+    scanf("%c",&choice);
+    if (choice=='Y')
+    {
+        printf("Plots Generating...\n");
+    
+    // Uruchamiam Pythona z urzyciem system
+    int result = system("python plots.py");
+
+    if (result == 0) {
+        printf("Action completed.\n");
+    } else {
+        printf("Mission Failed\n");
+    }
+    }
 
     // MEMORY CLEANUP
     free_matrix(X_balanced); free_matrix(Y_balanced);
