@@ -1,3 +1,4 @@
+#pragma once
 #include <stdio.h>
 #include <stdlib.h>
 #include "nn.h"
@@ -98,7 +99,6 @@ void add_matrices(matrix* mat1, matrix* mat2,matrix* add_mat)
 		return;
 	}
 
-	float sum = 0;
 	for (u32 i =0; i < mat1->rows; i++)
 	{
 		for (u32 j =0; j < mat2->columns; j++)
@@ -185,9 +185,9 @@ void add_vector_to_matrix(matrix* mat, matrix* vec, matrix* add_mat)
 		printf("Wrong matrix/vector dimensions!");
 		return;
 	}
-	for (int i = 0; i < mat->rows;i++)
+	for (u32 i = 0; i < mat->rows;i++)
 	{
-		for (int j = 0; j < mat->columns; j++)
+		for (u32 j = 0; j < mat->columns; j++)
 		{
 			float a = mat->data[i*mat->columns + j];
 			float b = vec->data[j];
@@ -199,10 +199,10 @@ void add_vector_to_matrix(matrix* mat, matrix* vec, matrix* add_mat)
 //---------------------------------Matrix printing-----------------------------------------//
 void print_matrix(matrix* mat)
 {
-	for (int i = 0; i < mat->rows; i++)
+	for (u32 i = 0; i < mat->rows; i++)
 	{
 		printf("\n");
-		for (int j = 0; j < mat->columns; j++)
+		for (u32 j = 0; j < mat->columns; j++)
 		{
 			printf("%f, ", (mat->data)[(i*(mat->columns))+j]);
 		}
