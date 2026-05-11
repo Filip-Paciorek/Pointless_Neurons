@@ -3,6 +3,8 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <stdint.h>
+#include <time.h>
+
 //size declarations
 #define INPUT_COLS 8
 #define TARGET_COLS 1
