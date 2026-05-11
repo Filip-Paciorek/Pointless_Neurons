@@ -68,7 +68,7 @@ Projekt obejmuje pełny proces analityczny:
 
 <div align = justify  style="background-color: #333333; padding: 15px; border-radius: 5px; border: 1px solid #555;">
 
-<strong>Analiza:</strong> Analiza krzywych ROC sugeruje wyższość <strong>Min-Max (AUC = 0.9669)</strong> nad Z-Score (AUC = 0.9465). Należy jednak zachować ostrożność w interpretacji tego wykresu. Przy tak ekstremalnie niezbalansowanym zbiorze krzywa ROC bywa nadmiernie optymistyczna, ponieważ gigantyczna ilość klasy negatywnej (szumu) maskuje błędy typu False Positive. Z tego powodu krzywa ta służy tu jedynie jako pogląd, a prawdziwym sprawdzianem dla modeli jest krzywa Precision-Recall (PR Curve).
+<strong>Analiza:</strong> Analiza krzywych ROC sugeruje wyższość <strong>Min-Max (AUC = 0.9581)</strong> nad Z-Score (AUC = 0.9194). Należy jednak zachować ostrożność w interpretacji tego wykresu. Przy tak ekstremalnie niezbalansowanym zbiorze krzywa ROC bywa nadmiernie optymistyczna, ponieważ gigantyczna ilość klasy negatywnej (szumu) maskuje błędy typu False Positive. Z tego powodu krzywa ta służy tu jedynie jako pogląd, a prawdziwym sprawdzianem dla modeli jest krzywa Precision-Recall (PR Curve).
 </div>
 <div align="center">
 
@@ -79,7 +79,7 @@ Projekt obejmuje pełny proces analityczny:
 
 
 <div align = justify  style="background-color: #333333; padding: 15px; border-radius: 5px; border: 1px solid #555;">
-<strong>Analiza:</strong> Krzywa PR to dla nas ostateczny test  przy tak mocno niezbalansowanych danych. Wyraźnie pokazuje ona, że model <strong>Min-Max (AP = 0.6667)</strong> radzi sobie dużo lepiej. Co bardzo ciekawe, na wykresie widać gwałtowne załamanie w okolicach progu <strong>Recall = 0.85</strong>.Oznacza to, że nasza sieć bez problemu i z dużą precyzją wyłapuje 85% pulsarów, ale pozostałe 15% jest tak głęboko zakopane w szumie kosmicznym, że stają się one dla tego modelu po prostu nie do odróżnienia od tła. Zderzyliśmy się tu ze "ścianą" i naturalnym limitem naszej obecnej architektury.
+<strong>Analiza:</strong> Krzywa PR to dla nas ostateczny test  przy tak mocno niezbalansowanych danych. Wyraźnie pokazuje ona, że model <strong>Min-Max (AP = 0.6932)</strong> radzi sobie dużo lepiej. Co bardzo ciekawe, na wykresie widać gwałtowne załamanie w okolicach progu <strong>Recall = 0.85</strong>.Oznacza to, że nasza sieć bez problemu i z dużą precyzją wyłapuje 85% pulsarów, ale pozostałe 15% jest tak głęboko zakopane w szumie kosmicznym, że stają się one dla tego modelu po prostu nie do odróżnienia od tła. Zderzyliśmy się tu ze "ścianą" i naturalnym limitem naszej obecnej architektury.
 </div>
 <br>
 
