@@ -10,6 +10,7 @@
 int main()
 {
     srand(time(NULL));
+    /*
     // Loading original raw data
     matrix *X_raw = allocate_matrix(TRAIN_SIZE, INPUT_COLS);
     matrix *Y_raw = allocate_matrix(TRAIN_SIZE, 1);
@@ -128,7 +129,7 @@ int main()
     // Saving raw probability outputs for Python Confusion Matrix and ROC plots
     save_matrix_to_csv("data_holder/y_pred_minmax.csv", final_preds_minmax);
     free_matrix(final_preds_minmax);
-
+*/
     //Plots call section
     printf("\n==========================================\n");
     printf("If you want generate plots choose Y/N: ");
@@ -148,7 +149,7 @@ int main()
         printf("Mission Failed\n");
     }
     }
-
+/*
     // MEMORY CLEANUP
     free_matrix(X_balanced); free_matrix(Y_balanced);
     free_matrix(X_test_raw); free_matrix(Y_test_raw);
@@ -156,6 +157,6 @@ int main()
     free_matrix(X_train); free_matrix(Y_train);
     free_matrix(X_test); free_matrix(Y_test);
     free_network(nn);
-
+*/
     return 0;
 }

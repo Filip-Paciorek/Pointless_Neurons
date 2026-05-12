@@ -34,8 +34,13 @@ Projekt obejmuje pełny proces analityczny:
 <div align="center">
 
 ## Analiza Wyników i Wnioski
+### 1. Analiza metryk dla poszczegolnych stadaryzacji
 
-### 1. Krzywa Uczenia (Learning Curve)
+
+
+
+
+### 2. Krzywa Uczenia (Learning Curve)
 <img src="./Plots_holder/learning_curve.png" width="600">
 
 </div>
@@ -46,7 +51,7 @@ Projekt obejmuje pełny proces analityczny:
 
 <div align="center">
 
-### 2. Macierze Pomyłek (Confusion Matrices)
+### 3. Macierze Pomyłek (Confusion Matrices)
 <img src="./Plots_holder/confusion_matrices_comparison.png" width="700">
 
 </div>
@@ -58,7 +63,7 @@ Projekt obejmuje pełny proces analityczny:
 
 <div align="center">
 
-### 3. Krzywa ROC (Receiver Operating Characteristic)
+### 4. Krzywa ROC (Receiver Operating Characteristic)
 <img src="./Plots_holder/roc_curve_comparison.png" width="700">
 
 </div>
@@ -70,7 +75,7 @@ Projekt obejmuje pełny proces analityczny:
 
 <div align="center">
 
-### 4. Krzywa Precision-Recall (PR Curve)
+### 5. Krzywa Precision-Recall (PR Curve)
 <img src="./Plots_holder/precision_recall_comparison.png" width="700">
 
 </div>
