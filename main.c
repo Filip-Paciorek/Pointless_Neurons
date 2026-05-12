@@ -42,8 +42,7 @@ int main()
     free_matrix(X_raw); 
     free_matrix(Y_raw);
     
-    // Saving raw balanced features for Python 
-    save_matrix_to_csv("x_raw.csv", X_balanced);
+
 
     // WORKSPACE MATRICES
     // Allocating workspace matrices using the new target_size
@@ -61,7 +60,7 @@ int main()
     transpose_matrix(Y_test_raw, Y_test);
 
     // Saving true test labels once to serve as ground truth for Python metrics
-    save_matrix_to_csv("y_true.csv", Y_test);
+    save_matrix_to_csv("data_holder/y_true.csv", Y_test);
 
     // Network structural configuration
     u32 layers_config[] = {8, 16, 1};
@@ -80,9 +79,7 @@ int main()
     // Applying scaling
     standardize_z_score(X_work, X_test_work);
     
-    // Saving scaled features for Python EDA comparison
-    save_matrix_to_csv("x_zscore.csv", X_work);
-    
+ 
     transpose_matrix(X_work, X_train);
     transpose_matrix(X_test_work, X_test);
 
@@ -90,7 +87,7 @@ int main()
     train(nn, X_train, Y_train, 0.1, epochs, batch_size, loss_history_zscore);
     
     // Exporting loss array for Python learning curve plots
-    save_to_csv("loss_zscore.csv", loss_history_zscore, epochs);
+    save_to_csv("data_holder/loss_zscore.csv", loss_history_zscore, epochs);
     
     evaluate(nn, X_test, Y_test, threshold);
     
@@ -98,7 +95,7 @@ int main()
     matrix *final_preds_zscore = predict(nn, X_test);
     
     // Saving raw probability outputs for Python Confusion Matrix and ROC plots
-    save_matrix_to_csv("y_pred_zscore.csv", final_preds_zscore);
+    save_matrix_to_csv("data_holder/y_pred_zscore.csv", final_preds_zscore);
     free_matrix(final_preds_zscore);
 
     //MIN-MAX (OVERSAMPLED DATA)
@@ -112,8 +109,7 @@ int main()
     // Applying scaling
     normalize_min_max(X_work, X_test_work);
     
-    // Saving scaled features for Python EDA comparison
-    save_matrix_to_csv("x_minmax.csv", X_work);
+
     
     transpose_matrix(X_work, X_train);
     transpose_matrix(X_test_work, X_test);
@@ -122,7 +118,7 @@ int main()
     train(nn, X_train, Y_train, 0.1, epochs, batch_size, loss_history_minmax);
     
     // Exporting loss array for Python learning curve plots
-    save_to_csv("loss_minmax.csv", loss_history_minmax, epochs);
+    save_to_csv("data_holder/loss_minmax.csv", loss_history_minmax, epochs);
 
     evaluate(nn, X_test, Y_test, threshold);
     
@@ -130,7 +126,7 @@ int main()
     matrix *final_preds_minmax = predict(nn, X_test);
     
     // Saving raw probability outputs for Python Confusion Matrix and ROC plots
-    save_matrix_to_csv("y_pred_minmax.csv", final_preds_minmax);
+    save_matrix_to_csv("data_holder/y_pred_minmax.csv", final_preds_minmax);
     free_matrix(final_preds_minmax);
 
     //Plots call section

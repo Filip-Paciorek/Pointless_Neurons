@@ -10,12 +10,12 @@ sns.set_style("whitegrid")
 
 # LOADING THE DATA 
 # Reading the raw outputs generated earlier by our C program
-loss_min_max = pd.read_csv('loss_minmax.csv', header=None)
-loss_z_score = pd.read_csv('loss_zscore.csv', header=None)
-y_pred_min_max = pd.read_csv('y_pred_minmax.csv', header=None)
-y_pred_z_score = pd.read_csv('y_pred_zscore.csv', header=None)
+loss_min_max = pd.read_csv('data_holder/loss_minmax.csv', header=None)
+loss_z_score = pd.read_csv('data_holder/loss_zscore.csv', header=None)
+y_pred_min_max = pd.read_csv('data_holder/y_pred_minmax.csv', header=None)
+y_pred_z_score = pd.read_csv('data_holder/y_pred_zscore.csv', header=None)
 # The actual ground truth: 1 means Pulsar, 0 means Noise
-y_true = pd.read_csv('y_true.csv', header=None) 
+y_true = pd.read_csv('data_holder/y_true.csv', header=None) 
 
 
 #LEARNING CURVE PLOT
@@ -37,7 +37,7 @@ plt.legend(fontsize=11)
 #Adjusting layout so nothing gets cut off, then saving and showing
 plt.tight_layout()
 #Uncomment the line below to save the plot for the README file
-#plt.savefig('learning_curve.png', dpi=300) 
+#plt.savefig('Plots_holder/learning_curve.png', dpi=300) 
 plt.show()
 
 
@@ -84,7 +84,7 @@ plt.suptitle('Comparison of Confusion Matrices: Min-Max vs Z-Score',
 plt.tight_layout(rect=[0, 0.03, 1, 0.95]) 
 
 # Uncomment the line below to save the plot for the README file
-#plt.savefig('confusion_matrices_comparison.png', dpi=300, bbox_inches='tight')
+#plt.savefig('Plots_holder/confusion_matrices_comparison.png', dpi=300, bbox_inches='tight')
 plt.show()
 
 
@@ -116,7 +116,7 @@ plt.legend(loc='lower right') # Best spot for ROC legend
 plt.grid(alpha=0.3)
 
 #Uncomment the line below to save the plot for the README file
-#plt.savefig('roc_curve_comparison.png', dpi=300)
+#plt.savefig('Plots_holder/roc_curve_comparison.png', dpi=300)
 plt.show()
 
 
@@ -148,5 +148,5 @@ plt.legend(loc='lower left')
 plt.grid(alpha=0.3)
 
 # Uncomment the line below to save the plot for the README file
-#plt.savefig('precision_recall_comparison.png', dpi=300, bbox_inches='tight')
+#plt.savefig('Plots_holder/precision_recall_comparison.png', dpi=300, bbox_inches='tight')
 plt.show()
