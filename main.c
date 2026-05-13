@@ -5,12 +5,15 @@
 #include "nn.h"
 #include "brain.h"
 // Defining epochs and threshold to avoid mistakes 
-#define epochs  10000
-#define threshold 0.7
+#define EPOCHS  10000
+#define THRESHOLD 0.7
+#define LAYERS_COUNT 3
+#define LAYERS_CONFIG {8,16,1}
+#define LEARNING_RATE 0.1
+#define BATCH_SIZE 32
 int main()
 {
     srand(time(NULL));
-    /*
     // Loading original raw data
     matrix *X_raw = allocate_matrix(TRAIN_SIZE, INPUT_COLS);
     matrix *Y_raw = allocate_matrix(TRAIN_SIZE, 1);
@@ -64,9 +67,9 @@ int main()
     save_matrix_to_csv("data_holder/y_true.csv", Y_test);
 
     // Network structural configuration
-    u32 layers_config[] = {8, 16, 1};
-    u32 batch_size = 32;
-    Network* nn = create_network_structure(layers_config, 3, batch_size);
+    u32 layers_config[] = LAYERS_CONFIG;
+    //u32 batch_size = 32;
+    Network* nn = create_network_structure(layers_config, LAYERS_COUNT, BATCH_SIZE);
 
 
 
@@ -84,13 +87,13 @@ int main()
     transpose_matrix(X_work, X_train);
     transpose_matrix(X_test_work, X_test);
 
-    float loss_history_zscore[epochs];
-    train(nn, X_train, Y_train, 0.1, epochs, batch_size, loss_history_zscore);
+    float loss_history_zscore[EPOCHS];
+    train(nn, X_train, Y_train, LEARNING_RATE, EPOCHS, BATCH_SIZE, loss_history_zscore);
     
     // Exporting loss array for Python learning curve plots
-    save_to_csv("data_holder/loss_zscore.csv", loss_history_zscore, epochs);
+    save_to_csv("data_holder/loss_zscore.csv", loss_history_zscore, EPOCHS);
     
-    evaluate(nn, X_test, Y_test, threshold);
+    evaluate(nn, X_test, Y_test, THRESHOLD);
     
     printf("\nExporting Z-Score predictions to CSV...\n");
     matrix *final_preds_zscore = predict(nn, X_test);
@@ -115,13 +118,13 @@ int main()
     transpose_matrix(X_work, X_train);
     transpose_matrix(X_test_work, X_test);
 
-    float loss_history_minmax[epochs];
-    train(nn, X_train, Y_train, 0.1, epochs, batch_size, loss_history_minmax);
+    float loss_history_minmax[EPOCHS];
+    train(nn, X_train, Y_train, LEARNING_RATE, EPOCHS, BATCH_SIZE, loss_history_minmax);
     
     // Exporting loss array for Python learning curve plots
-    save_to_csv("data_holder/loss_minmax.csv", loss_history_minmax, epochs);
+    save_to_csv("data_holder/loss_minmax.csv", loss_history_minmax, EPOCHS);
 
-    evaluate(nn, X_test, Y_test, threshold);
+    evaluate(nn, X_test, Y_test, THRESHOLD);
     
     printf("\nExporting Min-Max predictions to CSV...\n");
     matrix *final_preds_minmax = predict(nn, X_test);
@@ -129,7 +132,7 @@ int main()
     // Saving raw probability outputs for Python Confusion Matrix and ROC plots
     save_matrix_to_csv("data_holder/y_pred_minmax.csv", final_preds_minmax);
     free_matrix(final_preds_minmax);
-*/
+
     //Plots call section
     printf("\n==========================================\n");
     printf("If you want generate plots choose Y/N: ");
@@ -149,7 +152,7 @@ int main()
         printf("Mission Failed\n");
     }
     }
-/*
+
     // MEMORY CLEANUP
     free_matrix(X_balanced); free_matrix(Y_balanced);
     free_matrix(X_test_raw); free_matrix(Y_test_raw);
@@ -157,6 +160,6 @@ int main()
     free_matrix(X_train); free_matrix(Y_train);
     free_matrix(X_test); free_matrix(Y_test);
     free_network(nn);
-*/
+
     return 0;
 }
