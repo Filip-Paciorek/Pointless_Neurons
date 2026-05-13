@@ -134,3 +134,9 @@ Projekt obejmuje pełny proces analityczny:
 1. Kompilacja (wymaga biblioteki `-lm`):
    ```bash
    gcc main.c brain.c body.c matrix.c -o pulsary -lm
+2. Uruchomienie programu dla systemu Windows
+    ```bash
+    .\pulsary.exe
+3. Uruchomienie programu dla systemu Linux
+    ```bash
+    ./pulsary
