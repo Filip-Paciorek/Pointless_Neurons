@@ -52,7 +52,7 @@ void load_data(char *filename,matrix *X,matrix *Y,matrix* X_t,matrix* Y_t){//fun
         row_index += 1;}
     file_close(fptr);
 }
-void parse_csv_line(char *line, matrix *X, matrix *Y, u32 row_index){//function which "cuts" values in lines(from csv) separated , and convert them from string to float value
+void parse_csv_line(char *line, matrix *X, matrix *Y, u32 row_index){//function which "cuts" values in lines(from csv) separated , and convert them from string to double value
     const char s[4]=",";//seting char which will will be activator for strtok function to cut values
     char *tok;
     tok = strtok(line,s);// setting token to first line in csv file 
@@ -76,7 +76,7 @@ void parse_csv_line(char *line, matrix *X, matrix *Y, u32 row_index){//function 
     }
 }
 
-void standardize_z_score(matrix *mat,matrix *mat_test){//stndardize (Z_score) transfrming data to mean 0 an standard deviation 1
+void standardize_z_score(matrix *mat,matrix *mat_test){//stndardize (Z_score) transforming data to mean 0 an standard deviation 1
     for (u32 i = 0; i < INPUT_COLS; i++){
     double sum = 0.0;
         for (u32 j = 0; j < mat->rows; j++){
