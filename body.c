@@ -256,7 +256,6 @@ void evaluate(Network *nn, matrix *test_X, matrix *test_Y,float threshold){
 
 }
 void copy_matrix(matrix *mat,matrix *copy_matrix){
-    // function needed to separate date to min_max and z_score
 
     // condiiton checking if matrix where copied data will go is big enough to collet all copied data
     // beacuse it's copying samller matrix to bigger 
